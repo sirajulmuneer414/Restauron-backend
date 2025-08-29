@@ -1,0 +1,21 @@
+package dev.siraj.restauron.respository.userRepo;
+
+import dev.siraj.restauron.entity.enums.Roles;
+import dev.siraj.restauron.entity.users.UserAll;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<UserAll, Long> {
+    UserAll findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+
+
+    Page<UserAll> findByRole(Roles roles, Pageable pageable);
+    Page<UserAll> findByRoleNot(Roles roles, Pageable pageable);
+}
