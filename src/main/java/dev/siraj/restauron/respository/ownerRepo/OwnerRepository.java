@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface OwnerRepository extends JpaRepository<Owner, Long> {
 
     Owner findByUser(UserAll user);
+
+    void deleteByUser(UserAll user);
 }

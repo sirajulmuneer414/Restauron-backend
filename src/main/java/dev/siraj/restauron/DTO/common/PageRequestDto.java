@@ -56,4 +56,9 @@ public class PageRequestDto {
     public void setSearch(String search) {
         this.search = search;
     }
+
+    public boolean isSearchable(){
+        return search != null || !search.trim().isEmpty();
+    }
+
 }

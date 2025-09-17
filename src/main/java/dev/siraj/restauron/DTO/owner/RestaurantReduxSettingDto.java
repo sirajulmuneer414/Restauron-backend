@@ -1,24 +1,17 @@
 package dev.siraj.restauron.DTO.owner;
 
+
+import lombok.Data;
+
+@Data
 public class RestaurantReduxSettingDto {
+
 
     private String restaurantName;
 
     private String restaurantEncryptedId;
 
-    public String getRestaurantEncryptedId() {
-        return restaurantEncryptedId;
-    }
+    private String specialId;
 
-    public void setRestaurantEncryptedId(String restaurantEncryptedId) {
-        this.restaurantEncryptedId = restaurantEncryptedId;
-    }
 
-    public String getRestaurantName() {
-        return restaurantName;
-    }
-
-    public void setRestaurantName(String restaurantName) {
-        this.restaurantName = restaurantName;
-    }
 }

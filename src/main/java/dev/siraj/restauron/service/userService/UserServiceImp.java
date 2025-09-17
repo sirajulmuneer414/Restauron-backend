@@ -7,11 +7,13 @@ import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.mapping.admin.UserListMapping;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
+import dev.siraj.restauron.specification.UserSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,36 +50,30 @@ public class UserServiceImp implements UserService {
 
     @Override
     public Page<UserListResponse> findAllUsersExceptAdminWithFilter(PageRequestDto pageRequestDto) {
+        log.info("Fetching user list with filter: '{}' and search: '{}'", pageRequestDto.getFilter(), pageRequestDto.getSearch());
 
-        log.info("Inside the service method to fetch user list");
+        // Create a Specification with the dynamic filter and search criteria
+        Specification<UserAll> spec = UserSpecification.withDynamicQuery(
+                pageRequestDto.getFilter(),
+                pageRequestDto.getSearch()
+        );
+
         Pageable pageable = PageRequest.of(pageRequestDto.getPageNo(), pageRequestDto.getSize());
-        if(!pageRequestDto.isFiltered()){
-            log.info("No filter is found so returning users who is not admin with pagination");
 
-            return  userListMapping.userAllPageToUserResponseDtoPage(repository.findByRoleNot(Roles.ADMIN, pageable));
+        // Execute the query using the specification
+        Page<UserAll> userPage = repository.findAll(spec, pageable);
 
-
-        }
-
-        String filter = pageRequestDto.getFilter();
-
-        log.info("Filter found :{}", filter);
-
-        if(filter != null){
-            return switch (filter.toUpperCase()) {
-                case "OWNER" -> userListMapping.userAllPageToUserResponseDtoPage(repository.findByRole(Roles.OWNER, pageable));
-                case "EMPLOYEE" -> userListMapping.userAllPageToUserResponseDtoPage(repository.findByRole(Roles.EMPLOYEE, pageable));
-                case "CUSTOMER" -> userListMapping.userAllPageToUserResponseDtoPage(repository.findByRole(Roles.CUSTOMER, pageable));
-                default -> userListMapping.userAllPageToUserResponseDtoPage(repository.findByRoleNot(Roles.ADMIN, pageable));
-            };
-        }
-
-
-        return userListMapping.userAllPageToUserResponseDtoPage(repository.findByRoleNot(Roles.ADMIN, pageable));
+        // Map to DTO
+        return userListMapping.userAllPageToUserResponseDtoPage(userPage);
     }
 
     @Override
     public UserAll findUserById(Long userId) {
         return repository.findById(userId).get();
+    }
+
+    @Override
+    public void save(UserAll user) {
+        repository.save(user);
     }
 }

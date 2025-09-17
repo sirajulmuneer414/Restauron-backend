@@ -1,5 +1,6 @@
 package dev.siraj.restauron.service.restaurantService;
 
+import dev.siraj.restauron.DTO.customer.PublicViewRestaurantDto;
 import dev.siraj.restauron.DTO.owner.RestaurantReduxSettingDto;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Owner;
@@ -9,10 +10,13 @@ import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.ownerService.OwnerService;
 import dev.siraj.restauron.service.restaurantService.restaurantServiceInterface.RestaurantService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class RestaurantServiceImp implements RestaurantService {
 
     @Autowired
@@ -55,6 +59,24 @@ public class RestaurantServiceImp implements RestaurantService {
         dto.setRestaurantEncryptedId(idEncryptionService.encryptLongId(restaurant.getId()));
 
         return dto;
+    }
+
+    @Override
+    public PublicViewRestaurantDto getPublicRestaurantDetailsUsingEncryptedId(String encryptedId) {
+
+      //  Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
+        Long restaurantId = Long.parseLong(encryptedId);  // Temporarily till setting up encryptedIds
+        log.info("Decrypted public request for restaurant ID: {}", restaurantId);
+
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with ID: " + restaurantId));
+
+        PublicViewRestaurantDto dto = new PublicViewRestaurantDto();
+        dto.setName(restaurant.getName());
+        dto.setPhone(restaurant.getPhone());
+
+        return dto;
+
     }
 
 

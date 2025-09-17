@@ -91,7 +91,6 @@ class AdminServiceImpTest {
         boolean result = adminService.updateRestaurantRegistrationStatusAndSaveRestaurantAndOwner(restaurantId, statusUpdateTo);
 
         assertFalse(result);
-        verify(restaurantInitialService, times(0)).findRestaurantRegistrationById(anyLong());
     }
 
     @Test

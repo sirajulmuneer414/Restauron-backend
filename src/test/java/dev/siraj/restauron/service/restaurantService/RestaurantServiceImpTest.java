@@ -58,9 +58,9 @@ class RestaurantServiceImpTest {
     void testFindRestaurantByOwnerFromEncryptedId() {
         UserAll user = new UserAll();
         Owner owner = new Owner();
-        Restaurant restaurant = new Restaurant();
-        restaurant.setName("Test Restaurant");
-        restaurant.setId(1L);
+        Restaurant restaurant = mock(Restaurant.class);
+        when(restaurant.getName()).thenReturn("Test Restaurant");
+        when(restaurant.getId()).thenReturn(1L);
 
         when(idEncryptionService.decryptToLongId("encrypted-id")).thenReturn(1L);
         when(userService.findUserById(1L)).thenReturn(user);

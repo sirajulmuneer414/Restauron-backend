@@ -3,6 +3,7 @@ package dev.siraj.restauron.service.employeeManagementService;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
 import dev.siraj.restauron.DTO.owner.EmployeeRegistrationRequestDto;
 import dev.siraj.restauron.DTO.owner.EmployeeViewDto;
+import dev.siraj.restauron.DTO.owner.UpdateEmployeeRequestDto;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.Roles;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
@@ -121,6 +122,66 @@ public class EmployeeManagementServiceImp implements EmployeeManagementService{
 
         // Mapping entity Page to a Dto Page
         return employeePage.map(employeeMapping::mapToEmployeeViewDto);
+
+    }
+
+    @Override
+    public EmployeeViewDto getEmployeeDetails(String encryptedId) {
+
+        Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        log.info("Decrypted employee ID: {}. Fetching employee...",employeeId);
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for employee ID: "+employeeId));
+
+        log.info("Employee found for ID {}. Mapping to DTO", employee.getUser().getName());
+
+        return employeeMapping.mapToEmployeeViewDto(employee);
+
+    }
+
+    @Override
+    @Transactional
+    public void updateEmployeeDetails(String encryptedId, UpdateEmployeeRequestDto updateDto) {
+
+        Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        log.info("Attempting to update employee with employee ID: {}",employeeId);
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for employee ID: "+employeeId));
+
+        UserAll user = employee.getUser();
+
+        log.info("Updating details for user: {}",user.getName());
+
+        user.setName(updateDto.getName());
+        user.setPhone(updateDto.getPhone());
+
+        employee.setPersonalEmail(updateDto.getPersonalEmail());
+
+        employee.setAdhaarNo(updateDto.getAdhaarNo());
+        employee.setAdhaarPhoto(updateDto.getAdhaarPhoto());
+
+        employeeRepository.save(employee);
+
+        log.info("Successfully updated employee details for {}", user.getName());
+
+    }
+
+    @Transactional
+    @Override
+    public void deleteEmployee(String encryptedId) {
+
+        Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        log.warn("Attempting to delete employee with ID: {}", employeeId);
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for the ID : "+ employeeId));
+
+
+        employeeRepository.delete(employee);
+
+        log.info("Successfully deleted employee and associated user record for employee ID: {} ", employeeId);
 
     }
 

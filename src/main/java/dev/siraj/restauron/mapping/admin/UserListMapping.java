@@ -1,8 +1,12 @@
 package dev.siraj.restauron.mapping.admin;
 
 import dev.siraj.restauron.DTO.admin.UserListResponse;
+import dev.siraj.restauron.entity.users.Customer;
+import dev.siraj.restauron.entity.users.Employee;
 import dev.siraj.restauron.entity.users.Owner;
 import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
+import dev.siraj.restauron.respository.employeeRepo.EmployeeRepository;
 import dev.siraj.restauron.respository.ownerRepo.OwnerRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
@@ -28,6 +32,12 @@ public class UserListMapping {
     @Autowired
     private RestaurantRepository restaurantRepository;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
 
     public Page<UserListResponse> userAllPageToUserResponseDtoPage(Page<UserAll> all) {
         log.info("Inside method to page of pre restaurant to dto for react");
@@ -46,8 +56,12 @@ public class UserListMapping {
                     response.setRestaurantName(restaurantRepository.findByOwner(owner).getName());
                     break;
                 case "EMPLOYEE" :
+                    Employee employee = employeeRepository.findByUser(user);
+                    response.setRestaurantName(employee.getRestaurant().getName());
                     break;
                 case "CUSTOMER" :
+                    Customer customer = customerRepository.findByUser(user);
+                    response.setRestaurantName(customer.getRestaurant().getName());
                     break;
             }
 

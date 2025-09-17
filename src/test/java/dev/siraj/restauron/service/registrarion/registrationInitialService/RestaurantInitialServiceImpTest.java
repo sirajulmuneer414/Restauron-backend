@@ -48,8 +48,8 @@ class RestaurantInitialServiceImpTest {
 
     @Test
     void testFindRestaurantRegisterationOwnerIdByEmail_Found() {
-        RestaurantRegistration registration = new RestaurantRegistration();
-        registration.setId(1L);
+        RestaurantRegistration registration = mock(RestaurantRegistration.class);
+        when(registration.getId()).thenReturn(1L);
         when(repository.findByOwnerEmail("test@example.com")).thenReturn(registration);
         assertEquals(1L, service.findRestaurantRegisterationOwnerIdByEmail("test@example.com"));
     }

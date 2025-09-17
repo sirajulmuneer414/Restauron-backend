@@ -12,6 +12,8 @@ public class EmployeeViewDto {
 
     private String email;
 
+    private String personalEmail;
+
     private String status;
 
     private String encryptedId;

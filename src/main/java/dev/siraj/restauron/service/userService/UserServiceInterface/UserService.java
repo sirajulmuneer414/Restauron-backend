@@ -16,4 +16,6 @@ public interface UserService {
     Page<UserListResponse> findAllUsersExceptAdminWithFilter(PageRequestDto pageRequestDto);
 
     UserAll findUserById(Long userId);
+
+    void save(UserAll user);
 }

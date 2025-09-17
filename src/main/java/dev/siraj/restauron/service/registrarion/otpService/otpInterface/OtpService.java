@@ -17,4 +17,8 @@ public interface OtpService {
     boolean resendOtpUsingRestaurantRegistrationId(RestaurantRegistration userId);
 
     boolean resendOtpUsingAdminId(UserAll user, String email);
+
+    void generateAndSendOtp(String email);
+
+    boolean verifyOtp(String email, String otp);
 }

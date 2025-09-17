@@ -43,7 +43,8 @@ class OtpServiceImpTest {
 
     @Test
     void testVerifyOtpUsingEmail_Success() {
-        OtpDto otpDto = new OtpDto("123456", LocalDateTime.now());
+        OtpDto otpDto = new OtpDto();
+        otpDto.setOtp("123456");
         OtpAndUser otpAndUser = new OtpAndUser("123456", "test@example.com", LocalDateTime.now().plusMinutes(5));
 
         when(otpRepository.findByUserEmail("test@example.com")).thenReturn(otpAndUser);
@@ -53,7 +54,8 @@ class OtpServiceImpTest {
 
     @Test
     void testVerifyOtpUsingEmail_IncorrectOtp() {
-        OtpDto otpDto = new OtpDto("654321", LocalDateTime.now());
+        OtpDto otpDto = new OtpDto();
+        otpDto.setOtp("654321");
         OtpAndUser otpAndUser = new OtpAndUser("123456", "test@example.com", LocalDateTime.now().plusMinutes(5));
 
         when(otpRepository.findByUserEmail("test@example.com")).thenReturn(otpAndUser);
@@ -63,7 +65,8 @@ class OtpServiceImpTest {
 
     @Test
     void testVerifyOtpUsingEmail_Expired() {
-        OtpDto otpDto = new OtpDto("123456", LocalDateTime.now());
+        OtpDto otpDto = new OtpDto();
+        otpDto.setOtp("123456");
         OtpAndUser otpAndUser = new OtpAndUser("123456", "test@example.com", LocalDateTime.now().minusMinutes(1));
 
         when(otpRepository.findByUserEmail("test@example.com")).thenReturn(otpAndUser);

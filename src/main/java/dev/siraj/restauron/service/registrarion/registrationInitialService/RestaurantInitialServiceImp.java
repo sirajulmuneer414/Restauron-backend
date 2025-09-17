@@ -11,15 +11,22 @@ import dev.siraj.restauron.mapping.restaurantRegistrationMapping.RestaurantRegis
 import dev.siraj.restauron.respository.restaurantInitial.RestaurantInitialRepository;
 import dev.siraj.restauron.service.registrarion.adminRegistrationService.RegistrationInitialSpecification;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
+@Slf4j
 public class RestaurantInitialServiceImp implements RestaurantInitialService {
 
     @Autowired
@@ -85,26 +92,50 @@ public class RestaurantInitialServiceImp implements RestaurantInitialService {
 
         Pageable pageable = PageRequest.of(pageDetails.getPageNo(), pageDetails.getSize());
 
-        if(pageDetails.isFiltered()) {
 
-            RegistrationInitialSpecification<PendingStatuses> specification = new RegistrationInitialSpecification<>();
+            Specification<RestaurantRegistration> specification = buildSpecification(pageDetails);
 
-            PendingStatuses pendingStatuses = null;
-            for (PendingStatuses stat : PendingStatuses.values()) {
-                if(stat.name().equals(pageDetails.getFilter())) pendingStatuses = stat;
+            Page<RestaurantRegistration> pageRestaurant= repository.findAll(specification, pageable);
 
+            log.info("Found {} restaurantInitials on page {}", pageRestaurant.getNumberOfElements(), pageDetails.getSize());
+
+            return mapping.restaurantRegistrationToInitialResponsePagingMapping(pageRestaurant);
+
+
+
+    }
+
+    private Specification<RestaurantRegistration> buildSpecification(PageRequestDto pageDetails) {
+
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> finalPredicate = new ArrayList<>();
+
+            if(StringUtils.hasText(pageDetails.getFilter())){
+                try {
+                    PendingStatuses status = PendingStatuses.valueOf(pageDetails.getFilter().toUpperCase());
+
+                    finalPredicate.add(criteriaBuilder.equal(root.get("status"), status));
+
+                }catch (IllegalArgumentException e){
+                    log.warn("Invalid status filter provided: {}",pageDetails.getFilter());
+                }
             }
 
-            if(pendingStatuses != null) {
-                Specification<RestaurantRegistration> restaurantRegistrationSpecification = specification.filterRegistrationInitialAccordingToEnum("status", pendingStatuses);
+            if(StringUtils.hasText(pageDetails.getSearch())){
 
-                return mapping.restaurantRegistrationToInitialResponsePagingMapping(repository.findAll(restaurantRegistrationSpecification, pageable));
+                String searchPatter = "%"+pageDetails.getSearch()+"%";
+
+                Predicate searchPredicate = criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("ownerName")), searchPatter),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("ownerEmail")), searchPatter),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("restaurantName")),searchPatter)
+                );
+
+                finalPredicate.add(searchPredicate);
             }
 
-        }
-
-        return mapping.restaurantRegistrationToInitialResponsePagingMapping(repository.findAll(pageable));
-
+            return criteriaBuilder.and(finalPredicate.toArray(new Predicate[0]));
+        };
     }
 
     @Override

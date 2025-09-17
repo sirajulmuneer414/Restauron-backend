@@ -1,32 +1,27 @@
 package dev.siraj.restauron.entity.users;
 
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private UserAll customerDetails;
+    private UserAll user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
+    private Restaurant restaurant;
 
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public UserAll getCustomer() {
-
-        return customerDetails;
-    }
-
-    public void setCustomer(UserAll customer) {
-
-
-        this.customerDetails = customer;
-    }
 }

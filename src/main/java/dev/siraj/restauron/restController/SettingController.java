@@ -2,14 +2,19 @@ package dev.siraj.restauron.restController;
 
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.Roles;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Admin;
+import dev.siraj.restauron.entity.users.Customer;
 import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
+import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.registrarion.adminRegistrationService.adminRegistrationInterface.AdminRegistrationService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -20,22 +25,27 @@ import org.springframework.web.bind.annotation.RestController;
 @Component
 public class SettingController implements CommandLineRunner {
 
+    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+    private final AdminRegistrationService adminRegistrationService;
+    private final String ADMIN_SECURITY_CODE;
 
+    private static final String ADMIN_EMAIL_ID = "Admin@restauron.com";
+    private static final String ADMIN_PHONE_NUMBER = "8943253154";
+    private static final Logger log = LoggerFactory.getLogger(SettingController.class);
+
+    // Use constructor injection for all dependencies
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private AdminRegistrationService adminRegistrationService;
-
-    private final String ADMIN_SECURITY_CODE = "KJ9MP4XN7QRTY2VL8WZ3";
-    private final String ADMIN_EMAIL_ID = "Admin@restauron.com";
-    private final String ADMIN_PHONE_NUMBER = "8943253154";
-    private final Logger log = LoggerFactory.getLogger(SettingController.class);
-
-
-    // Method to check in the database whether admin exists or not and setting up the admin if not
-
+    public SettingController(
+            PasswordEncoder passwordEncoder,
+            UserService userService,
+            AdminRegistrationService adminRegistrationService,
+            @Value("${app.admin-password}") String adminSecurityCode) {
+        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
+        this.adminRegistrationService = adminRegistrationService;
+        this.ADMIN_SECURITY_CODE = adminSecurityCode;
+    }
     @Override
     @Transactional
     public void run(String... args) throws Exception {
@@ -65,6 +75,11 @@ public class SettingController implements CommandLineRunner {
         adminRegistrationService.saveAdmin(admin);
 
         log.info("Admin created successfully, exiting the method");
+
+
+
+
+
     }
 }
 

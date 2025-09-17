@@ -118,6 +118,7 @@ public class RestaurantRegistrationMapping {
         restaurant.setDistrict(restaurantRegistration.getDistrict());
         restaurant.setState(restaurantRegistration.getState());
         restaurant.setPincode(restaurantRegistration.getPincode());
+        restaurant.setStatus(AccountStatus.ACTIVE);
 
 
         return restaurant;

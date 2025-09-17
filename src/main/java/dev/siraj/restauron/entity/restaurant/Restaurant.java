@@ -1,5 +1,6 @@
 package dev.siraj.restauron.entity.restaurant;
 
+import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.users.Employee;
 import dev.siraj.restauron.entity.users.Owner;
 import jakarta.persistence.*;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Restaurant {
+public class  Restaurant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +31,9 @@ public class Restaurant {
     private String state;
 
     private String pincode;
+
+    @Enumerated(value = EnumType.STRING)
+    private AccountStatus status;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id",referencedColumnName = "id", nullable = false)
@@ -126,5 +130,13 @@ public class Restaurant {
 
     public void setOwner(Owner owner) {
         this.owner = owner;
+    }
+
+    public AccountStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountStatus status) {
+        this.status = status;
     }
 }

@@ -44,11 +44,11 @@ class AuthenticationServiceTest {
     @Test
     void testCreateResponseToken_Success() {
         EmailPasswordDto emailPasswordDto = new EmailPasswordDto("test@test.com", "password");
-        UserAll user = new UserAll();
-        user.setEmail("test@test.com");
-        user.setName("Test User");
-        user.setId(1L);
-        user.setRole(Roles.ROLE_USER);
+        UserAll user = mock(UserAll.class);
+        when(user.getEmail()).thenReturn("test@test.com");
+        when(user.getName()).thenReturn("Test User");
+        when(user.getRole()).thenReturn(Roles.CUSTOMER);
+        when(user.getId()).thenReturn(1L);
 
         Authentication authentication = mock(Authentication.class);
 

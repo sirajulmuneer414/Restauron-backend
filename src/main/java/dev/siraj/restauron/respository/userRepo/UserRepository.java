@@ -6,10 +6,11 @@ import dev.siraj.restauron.entity.users.UserAll;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserAll, Long> {
+public interface UserRepository extends JpaRepository<UserAll, Long>, JpaSpecificationExecutor<UserAll> {
     UserAll findByEmail(String email);
 
     boolean existsByEmail(String email);
@@ -18,4 +19,5 @@ public interface UserRepository extends JpaRepository<UserAll, Long> {
 
     Page<UserAll> findByRole(Roles roles, Pageable pageable);
     Page<UserAll> findByRoleNot(Roles roles, Pageable pageable);
+
 }

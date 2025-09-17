@@ -43,11 +43,11 @@ public class SecurityConfig {
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests((request) -> request.requestMatchers("/registration/*","/registration/*/**","/auth/*").permitAll()
+                .authorizeHttpRequests((request) -> request.requestMatchers("/registration/*","/registration/*/**","/auth/*","/public/**").permitAll()
                         .anyRequest().authenticated()
 
                 )
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2.disable())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .csrf((csrf) -> csrf.disable())
                 .build();

@@ -8,6 +8,7 @@ import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.otpRepository.OtpAndUserRepository;
 import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
 import dev.siraj.restauron.service.registrarion.otpService.otpInterface.OtpService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class OtpServiceImp implements OtpService {
 
     @Autowired
@@ -151,6 +153,45 @@ public class OtpServiceImp implements OtpService {
            } catch (Exception e) {
         return false;
     }
+        return true;
+    }
+
+    @Override
+    public void generateAndSendOtp(String email) {
+        String otp = String.format("%06d", new Random().nextInt(999999));
+        log.info("Generated OTP {} for email {}", otp, email);
+
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
+        OtpAndUser otpAndUser = otpRepository.findByUserEmail(email);
+
+        if(otpAndUser == null)otpAndUser = new OtpAndUser();
+
+        otpAndUser.setUserEmail(email);
+        otpAndUser.setOtp(otp);
+        otpAndUser.setOtpCreatedTime(LocalDateTime.now());
+        otpAndUser.setOtpExpirationTime(expirationTime);
+        otpRepository.save(otpAndUser);
+
+        String emailBody = "Your One-Time Password (OTP) for Restauron is: " + otp;
+        emailService.sendEmail(email, emailBody, "Restauron - Verify Your Email");
+
+    }
+
+    @Override
+    public boolean verifyOtp(String email, String otp) {
+        OtpAndUser otpAndUser = otpRepository.findByUserEmail(email);
+                if(otpAndUser == null) throw new IllegalArgumentException("OTP not found. Please request a new one.");
+
+        if (otpAndUser.getOtpExpirationTime().isBefore(LocalDateTime.now())) {
+            otpRepository.delete(otpAndUser);
+            throw new IllegalArgumentException("OTP has expired. Please request a new one.");
+        }
+
+        if (!otpAndUser.getOtp().equals(otp)) {
+            return false;
+        }
+
+        otpRepository.delete(otpAndUser); // OTP is valid, clean it up
         return true;
     }
 }

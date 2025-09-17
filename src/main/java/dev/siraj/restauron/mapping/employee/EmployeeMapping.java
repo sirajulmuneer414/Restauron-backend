@@ -22,6 +22,7 @@ public class EmployeeMapping {
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         dto.setStatus(user.getStatus().name());
+        dto.setPersonalEmail(employee.getPersonalEmail());
 
         dto.setEncryptedId(idEncryptionService.encryptLongId(employee.getId()));
 
