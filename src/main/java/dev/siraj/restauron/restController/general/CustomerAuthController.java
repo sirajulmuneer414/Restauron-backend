@@ -6,8 +6,8 @@ import dev.siraj.restauron.DTO.customer.OTP.RegisterVerifyRequestDto;
 import dev.siraj.restauron.DTO.customer.auth.AuthResponseDto;
 import dev.siraj.restauron.DTO.customer.auth.GoogleLoginRequestDto;
 import dev.siraj.restauron.DTO.customer.auth.LoginRequestDto;
-import dev.siraj.restauron.DTO.customer.auth.RegisterRequestDto;
-import dev.siraj.restauron.DTO.registration.OtpDto;
+import dev.siraj.restauron.entity.authentication.RefreshToken;
+import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.customer.customerAuthService.CustomerAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerAuthController {
 
     @Autowired private CustomerAuthService customerAuthService;
+    @Autowired private RefreshTokenService refreshTokenService;
 
 
     @PostMapping("/login")
@@ -30,9 +31,11 @@ public class CustomerAuthController {
 
         String token = customerAuthService.login(requestDto);
 
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(requestDto.getEmail());
+
         log.info("completed logging in for the user : {}",requestDto.getEmail());
 
-        return ResponseEntity.ok(new AuthResponseDto(token));
+        return ResponseEntity.ok(new AuthResponseDto(token, refreshToken));
     }
 
     @PostMapping("/google")
@@ -42,12 +45,13 @@ public class CustomerAuthController {
             ){
         log.info("Inside the google login for customer : {}",requestDto.getToken());
 
-        String token = customerAuthService.processGoogleLogin(requestDto, encryptedId);
+        AuthResponseDto token = customerAuthService.processGoogleLogin(requestDto, encryptedId);
+
 
         log.info("Completed logging in for customer through google, token ; {}", requestDto.getToken());
         log.info("The resulting JWT token : {}", token);
 
-        return ResponseEntity.ok(new AuthResponseDto(token));
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/send-otp")
@@ -65,9 +69,10 @@ public class CustomerAuthController {
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
         log.info("Inside the register and verify controller for customer : {}", requestDto.getName());
         String token = customerAuthService.verifyAndRegister(requestDto, encryptedRestaurantId);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(requestDto.getEmail());
 
         log.info("Register and verification completed successfully");
-        return ResponseEntity.ok(new AuthResponseDto(token));
+        return ResponseEntity.ok(new AuthResponseDto(token, refreshToken));
     }
 
 }

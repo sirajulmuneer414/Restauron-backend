@@ -1,7 +1,13 @@
 package dev.siraj.restauron.restController.authentication;
 
 import dev.siraj.restauron.DTO.authentication.EmailPasswordDto;
+import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
+import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
+import dev.siraj.restauron.DTO.customer.auth.AuthResponseDto;
+import dev.siraj.restauron.entity.authentication.RefreshToken;
+import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.service.authentication.AuthenticationService;
+import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +30,8 @@ public class AuthenticationController {
     @Autowired
     private RestaurantInitialService restaurantInitialService;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
 
     @PostMapping("/login")
@@ -36,7 +44,9 @@ public class AuthenticationController {
         if(doesUserAllExists){
             System.out.println("User does exists");
 
-                return authenticationService.createResponseToken(emailPasswordDto);
+                JwtAuthResponse response =  authenticationService.createResponseToken(emailPasswordDto);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
         if(restaurantInitialService.registrationEmailExists(emailPasswordDto.getEmail())){
@@ -47,6 +57,31 @@ public class AuthenticationController {
 
         return new ResponseEntity<>("Bad Credentials Please Check",HttpStatus.NOT_FOUND);
 
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<JwtAuthResponse> refreshToken(@RequestBody RefreshTokenRequestDto request) {
+        JwtAuthResponse dto = authenticationService.recreateAfterRefreshToken(request);
+
+        return new ResponseEntity<>(dto,HttpStatus.OK);
 
     }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+        try {
+            // Extract username from the access token
+            String jwt = token.substring(7); // Remove "Bearer "
+
+            authenticationService.logoutUser(jwt);
+
+
+            return ResponseEntity.ok("Logged out successfully");
+        } catch (Exception e) {
+            log.error("Error during logout: {}", e.getMessage());
+            return ResponseEntity.ok("Logged out"); // Still return success
+        }
+    }
+
 }

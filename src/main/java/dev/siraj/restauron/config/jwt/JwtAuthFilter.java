@@ -1,6 +1,6 @@
 package dev.siraj.restauron.config.jwt;
 
-import dev.siraj.restauron.service.authentication.interfaces.JwtService;
+import dev.siraj.restauron.service.authentication.JwtServiceImp;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     @Autowired
-    private JwtService jwtService;
+    private JwtServiceImp jwtService;
 
     @Autowired
     private UserDetailsService userDetailsService; // Single service for all user types

@@ -3,17 +3,19 @@ package dev.siraj.restauron.service.authentication;
 
 import dev.siraj.restauron.DTO.authentication.EmailPasswordDto;
 import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
+import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
+import dev.siraj.restauron.entity.authentication.RefreshToken;
 import dev.siraj.restauron.entity.enums.Roles;
 import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
+import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -30,18 +32,20 @@ public class AuthenticationService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
-    public ResponseEntity<?> createResponseToken(EmailPasswordDto emailPasswordDto){
+    @Autowired
+    private UserRepository userRepository;
+
+
+    public JwtAuthResponse createResponseToken(EmailPasswordDto emailPasswordDto){
 
 
         Authentication authentication;
 
-        try {
-             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(emailPasswordDto.getEmail(), emailPasswordDto.getPassword()));
 
-        } catch (AuthenticationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(emailPasswordDto.getEmail(), emailPasswordDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -50,11 +54,35 @@ public class AuthenticationService {
         Roles role = user.getRole();
 
         String jwtToken = jwtService.generateToken(role.name(),user.getEmail(), user.getName(), user.getId());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
         System.out.println("Reached till the return");
 
-        return new ResponseEntity<>(new JwtAuthResponse(jwtToken),HttpStatus.OK);
+        return new JwtAuthResponse(jwtToken, refreshToken.getToken());
+    }
+
+    public JwtAuthResponse recreateAfterRefreshToken(RefreshTokenRequestDto requestDto){
+
+        return refreshTokenService.findByToken(requestDto.getRefreshToken())
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String accessToken = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(),user.getId());
+                    return new JwtAuthResponse(accessToken,requestDto.getRefreshToken());
+                }).orElseThrow(() -> new RuntimeException("Refresh token not found"));
+
     }
 
 
+    @Transactional
+    public void logoutUser(String jwt) {
+
+        String username = jwtService.extractUsername(jwt);
+
+        // Find user and delete their refresh token
+        UserAll user = userRepository.findByEmail(username);
+        if (user != null) {
+            refreshTokenService.deleteByUser(user);
+        }
+    }
 }

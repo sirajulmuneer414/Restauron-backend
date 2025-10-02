@@ -1,13 +1,19 @@
 package dev.siraj.restauron.service.authentication;
 
 
+import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +26,14 @@ public class JwtServiceImp implements JwtService {
     @Autowired
     private IdEncryptionService idEncryptionService;
 
-    private static final String SECRET_KEY = "2CD64d4f4e4b5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t5u6";
+    @Autowired
+    private UserRepository userRepository;
+
+    @Value("${application.security.jwt.secret-key}")
+    private String secret_key;
+
+    @Value("${application.security.jwt.expiration}")
+    private long expiration;
 
     public String extractUsername(String token) {
 
@@ -47,17 +60,29 @@ public class JwtServiceImp implements JwtService {
             String name,
             Long userId
     ) {
+        return buildToken(role, username, name, userId);
+
+    }
+
+    private String buildToken( String role,
+                               String username,
+                               String name,
+                               Long userId
+    ){
+
+        UserAll user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         return Jwts.builder()
                 .claim("role",role)
                 .setSubject(username)
                 .claim("userId", idEncryptionService.encryptLongId(userId))
                 .claim("username",name)
                 .claim("email",username)
+                .claim("status",user.getStatus())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS256, getSigningKey())
                 .compact();
-
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -82,8 +107,10 @@ public class JwtServiceImp implements JwtService {
     }
 
 
-    private String getSigningKey() {
-        return SECRET_KEY;
+    private byte[] getSigningKey() {
+        System.out.println("secret key : "+secret_key);
+        System.out.println("expiration : "+expiration);
+        return Decoders.BASE64.decode(secret_key);
 
     }
 

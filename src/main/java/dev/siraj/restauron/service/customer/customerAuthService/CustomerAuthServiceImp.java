@@ -5,9 +5,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import dev.siraj.restauron.DTO.customer.OTP.RegisterVerifyRequestDto;
+import dev.siraj.restauron.DTO.customer.auth.AuthResponseDto;
 import dev.siraj.restauron.DTO.customer.auth.GoogleLoginRequestDto;
 import dev.siraj.restauron.DTO.customer.auth.LoginRequestDto;
 import dev.siraj.restauron.DTO.customer.auth.RegisterRequestDto;
+import dev.siraj.restauron.entity.authentication.RefreshToken;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.Roles;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
@@ -17,6 +19,7 @@ import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
+import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.registrarion.otpService.otpInterface.OtpService;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,6 +45,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
     @Autowired private CustomerRepository customerRepository;
     @Autowired private JwtService jwtService;
     @Autowired private OtpService otpService;
+    @Autowired private RefreshTokenService refreshTokenService;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
@@ -106,7 +110,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
     @Override
     @Transactional
-    public String processGoogleLogin(GoogleLoginRequestDto requestDto, String encryptedId) {
+    public AuthResponseDto processGoogleLogin(GoogleLoginRequestDto requestDto, String encryptedId) {
 
         log.info("Inside the google login for customer");
         try {
@@ -147,7 +151,10 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
             log.info("Verified for user : {}, email : {}", user.getName(), user.getEmail());
 
-            return jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId());
+            String token =  jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
+
+            return new AuthResponseDto(token, refreshToken);
         } catch (Exception e) {
             log.error("Google sign-in error", e);
             throw new RuntimeException("Google sign-in failed.");

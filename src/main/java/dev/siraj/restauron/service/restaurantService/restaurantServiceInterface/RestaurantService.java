@@ -13,4 +13,6 @@ public interface RestaurantService {
     RestaurantReduxSettingDto findRestaurantByOwnerFromEncryptedId(String ownerUserId);
 
     PublicViewRestaurantDto getPublicRestaurantDetailsUsingEncryptedId(String encryptedId);
+
+
 }

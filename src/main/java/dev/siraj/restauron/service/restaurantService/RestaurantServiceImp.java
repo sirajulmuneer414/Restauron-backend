@@ -7,7 +7,7 @@ import dev.siraj.restauron.entity.users.Owner;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
-import dev.siraj.restauron.service.ownerService.OwnerService;
+import dev.siraj.restauron.service.ownerService.interfaces.OwnerService;
 import dev.siraj.restauron.service.restaurantService.restaurantServiceInterface.RestaurantService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -74,6 +74,7 @@ public class RestaurantServiceImp implements RestaurantService {
         PublicViewRestaurantDto dto = new PublicViewRestaurantDto();
         dto.setName(restaurant.getName());
         dto.setPhone(restaurant.getPhone());
+        dto.setEncryptedId(idEncryptionService.encryptLongId(restaurant.getId()));
 
         return dto;
 

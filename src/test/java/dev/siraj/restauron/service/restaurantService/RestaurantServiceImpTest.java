@@ -7,7 +7,7 @@ import dev.siraj.restauron.entity.users.Owner;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
-import dev.siraj.restauron.service.ownerService.OwnerService;
+import dev.siraj.restauron.service.ownerService.interfaces.OwnerService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

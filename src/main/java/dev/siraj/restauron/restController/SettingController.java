@@ -51,6 +51,7 @@ public class SettingController implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         if(userService.userExistsByEmailId(ADMIN_EMAIL_ID)){
+
             log.info("Admin already exists, exiting the method");
             return;}
 
