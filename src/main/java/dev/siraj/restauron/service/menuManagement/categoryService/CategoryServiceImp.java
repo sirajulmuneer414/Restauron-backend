@@ -1,7 +1,7 @@
 package dev.siraj.restauron.service.menuManagement.categoryService;
 
 import dev.siraj.restauron.DTO.owner.menuManagement.CategoryResponseDto;
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.entity.menuManagement.Category;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.respository.menuManagement.categoryRepo.CategoryRepository;
@@ -53,7 +53,7 @@ public class CategoryServiceImp implements CategoryService {
         category.setDescription(payload.getOrDefault("description", "No Description for this category"));
         category.setRestaurant(restaurant);
         // Set a default status upon creation
-        category.setStatus(ItemStatus.UNAVAILABLE); // As per your entity logic
+        category.setStatus(AvailabilityStatus.UNAVAILABLE); // As per your entity logic
 
         categoryRepository.save(category);
     }
@@ -136,15 +136,15 @@ public class CategoryServiceImp implements CategoryService {
      */
     @Override
     @Transactional
-    public void updateCategoryStatus(String categoryEncryptedId, ItemStatus status) {
+    public void updateCategoryStatus(String categoryEncryptedId, AvailabilityStatus status) {
         Long categoryId = idEncryptionService.decryptToLongId(categoryEncryptedId);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with encrypted id: " + categoryEncryptedId));
 
         category.setStatus(status);
-        if(status.equals(ItemStatus.UNAVAILABLE)){
+        if(status.equals(AvailabilityStatus.UNAVAILABLE)){
             log.info("Category '{}' status set to UNAVAILABLE. Updating all associated menu items.", category.getName());
-            int menuItemModifiedCount = menuItemRepository.updateStatusAndAvailabilityByCategoryId(categoryId,ItemStatus.UNAVAILABLE,false);
+            int menuItemModifiedCount = menuItemRepository.updateStatusAndAvailabilityByCategoryId(categoryId, AvailabilityStatus.UNAVAILABLE,false);
 
             log.info("Bulk updated {} menu items for category ID {} to UNAVAILABLE and isAvailable=false.",menuItemModifiedCount , categoryId);
 

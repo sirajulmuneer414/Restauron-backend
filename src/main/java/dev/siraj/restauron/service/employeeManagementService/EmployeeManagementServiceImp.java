@@ -13,6 +13,7 @@ import dev.siraj.restauron.mapping.employee.EmployeeMapping;
 import dev.siraj.restauron.respository.employeeRepo.EmployeeRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.service.cloudinaryService.ImageUploadService;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
 import jakarta.persistence.EntityNotFoundException;
@@ -43,6 +44,7 @@ public class EmployeeManagementServiceImp implements EmployeeManagementService{
     @Autowired private EmployeeRepository employeeRepository;
     @Autowired private EmailService emailService;
     @Autowired private EmployeeMapping employeeMapping;
+    @Autowired private ImageUploadService imageUploadService;
 
     @Override
     @Transactional
@@ -55,10 +57,6 @@ public class EmployeeManagementServiceImp implements EmployeeManagementService{
         log.info("Received the Long Id for fetching restaurant: {}", restaurantId);
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() -> new EntityNotFoundException("Restaurant Not Found for ID: "+restaurantId));
-        if(restaurant.getEmployees() == null){
-            log.info("Restaurant employee list was empty so added with a new ArrayList<>()");
-            restaurant.setEmployeesList(new ArrayList<>());
-        }
 
         log.info("Operating on restaurant: {}", restaurant.getName());
 
@@ -82,8 +80,11 @@ public class EmployeeManagementServiceImp implements EmployeeManagementService{
         //Create and Save Employee-specific record
         Employee employee = new Employee();
         employee.setUser(savedUser);
-        employee.setAdhaarNo(dto.getAdhaarNo());
-        employee.setAdhaarPhoto(dto.getAdhaarPhoto());
+        employee.setAdhaarNo(dto.getAadhaarNo());
+        if(dto.getAadhaarNo() != null){
+            String adhaarPhotoUrl = imageUploadService.imageUploader(dto.getAadhaarImage(), "AadhaarPhoto-employee-"+restaurant.getId());
+            employee.setAdhaarPhoto(adhaarPhotoUrl);
+        }
         employee.setPersonalEmail(dto.getPersonalEmail());
 
         // By using addEmployee as a helper method add into both restaurant and employee class
@@ -160,7 +161,13 @@ public class EmployeeManagementServiceImp implements EmployeeManagementService{
         employee.setPersonalEmail(updateDto.getPersonalEmail());
 
         employee.setAdhaarNo(updateDto.getAdhaarNo());
-        employee.setAdhaarPhoto(updateDto.getAdhaarPhoto());
+        if(updateDto.getAdhaarPhoto() != null){
+            if(!employee.getAdhaarPhoto().isEmpty()) imageUploadService.deleteImageByUrl(employee.getAdhaarPhoto());
+
+
+            String adhaarImageUrl = imageUploadService.imageUploader(updateDto.getAdhaarPhoto(),"AadhaarPhoto-employee-"+employee.getRestaurant().getId() );
+            employee.setAdhaarPhoto(adhaarImageUrl);
+        }
 
         employeeRepository.save(employee);
 
@@ -170,16 +177,21 @@ public class EmployeeManagementServiceImp implements EmployeeManagementService{
 
     @Transactional
     @Override
-    public void deleteEmployee(String encryptedId) {
+    public void deleteEmployee(String encryptedId, String restaurantEncryptedId) {
 
         Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        Long restaurantId = idEncryptionService.decryptToLongId(restaurantEncryptedId);
 
         log.warn("Attempting to delete employee with ID: {}", employeeId);
 
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for the ID : "+ employeeId));
 
+        Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() -> new EntityNotFoundException("Restaurant is not found"));
 
-        employeeRepository.delete(employee);
+        restaurant.removeEmployee(employee);
+
+        restaurantRepository.save(restaurant);
 
         log.info("Successfully deleted employee and associated user record for employee ID: {} ", employeeId);
 

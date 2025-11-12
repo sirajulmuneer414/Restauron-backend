@@ -23,4 +23,5 @@ public interface MenuItemService {
 
     void deleteMenuItem(String menuItemEncryptedId);
 
+    List<MenuItemResponseDto> getMenuItemListThroughNameSearch(String restaurantEncryptedId, String menuItemName);
 }

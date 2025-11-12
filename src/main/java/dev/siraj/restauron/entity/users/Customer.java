@@ -2,13 +2,13 @@ package dev.siraj.restauron.entity.users;
 
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "restaurant_id"})
 })
@@ -30,4 +30,6 @@ public class Customer {
     // Optional: Track registration date for each restaurant
     @Column(name = "registered_at")
     private LocalDateTime registeredAt = LocalDateTime.now();
+
+    private String profilePictureUrl;
 }

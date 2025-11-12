@@ -9,6 +9,7 @@ import dev.siraj.restauron.entity.restaurant.RestaurantRegistration;
 import dev.siraj.restauron.exceptionHandlers.customExceptions.RegistrationUserNotFoundException;
 import dev.siraj.restauron.mapping.restaurantRegistrationMapping.RestaurantRegistrationMapping;
 import dev.siraj.restauron.respository.restaurantInitial.RestaurantInitialRepository;
+import dev.siraj.restauron.service.cloudinaryService.ImageUploadService;
 import dev.siraj.restauron.service.registrarion.adminRegistrationService.RegistrationInitialSpecification;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
 import jakarta.persistence.criteria.Predicate;
@@ -33,20 +34,23 @@ public class RestaurantInitialServiceImp implements RestaurantInitialService {
     RestaurantInitialRepository repository;
     @Autowired
     RestaurantRegistrationMapping mapping;
+    @Autowired
+    ImageUploadService imageUploadService;
 
 
     @Override
     @Transactional
     public RestaurantRegistration registerRestaurantForApproval(RestaurantRegistrationDto restaurantRegistrationDto) {
 
+        String aadhaarPhoto = imageUploadService.imageUploader(restaurantRegistrationDto.getAadhaarPhoto(), "Aadhaar-owner");
+
         RestaurantRegistration restaurantRegistration = mapping.registrationDtoToTableEntityMapping(restaurantRegistrationDto);
 
+        restaurantRegistration.setOwnerAdhaarPhoto(aadhaarPhoto);
 
-       RestaurantRegistration registeredRestaurant = repository.save(restaurantRegistration);
-
-
-        return registeredRestaurant;
+        return repository.save(restaurantRegistration);
     }
+
 
     @Override
     public Long findRestaurantRegisterationOwnerIdByEmail(String email) {

@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class MenuItemResponseDto {
     private String encryptedId;
+    private Long menuItemId;
     private String name;
     private String description;
     private Double price;

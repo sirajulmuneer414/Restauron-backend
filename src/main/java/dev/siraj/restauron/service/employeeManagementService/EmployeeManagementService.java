@@ -17,5 +17,5 @@ public interface EmployeeManagementService {
 
     void updateEmployeeDetails(String encryptedId, UpdateEmployeeRequestDto updateDto);
 
-    void deleteEmployee(String encryptedId);
+    void deleteEmployee(String encryptedId, String restaurantEncryptedId);
 }

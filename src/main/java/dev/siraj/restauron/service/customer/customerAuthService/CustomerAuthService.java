@@ -9,11 +9,11 @@ import dev.siraj.restauron.DTO.customer.auth.RegisterRequestDto;
 public interface CustomerAuthService {
     String register(RegisterRequestDto requestDto, String encryptedRestaurantId);
 
-    String login(LoginRequestDto requestDto);
+    AuthResponseDto login(LoginRequestDto requestDto);
 
     AuthResponseDto processGoogleLogin(GoogleLoginRequestDto requestDto, String encryptedId);
 
     void sendRegistrationOtp(String email);
 
-    String verifyAndRegister(RegisterVerifyRequestDto requestDto, String encryptedRestaurantId);
+    AuthResponseDto verifyAndRegister(RegisterVerifyRequestDto requestDto, String encryptedRestaurantId);
 }

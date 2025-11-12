@@ -12,6 +12,7 @@ import dev.siraj.restauron.service.authentication.interfaces.JwtService;
 import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AuthenticationService {
 
@@ -63,12 +65,14 @@ public class AuthenticationService {
 
     public JwtAuthResponse recreateAfterRefreshToken(RefreshTokenRequestDto requestDto){
 
-        return refreshTokenService.findByToken(requestDto.getRefreshToken())
+        log.info("Inside the refreshTokenRecreational service");
+
+        return refreshTokenService.findByToken(requestDto.getOldRefreshToken())
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
                     String accessToken = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(),user.getId());
-                    return new JwtAuthResponse(accessToken,requestDto.getRefreshToken());
+                    return new JwtAuthResponse(accessToken,requestDto.getOldRefreshToken());
                 }).orElseThrow(() -> new RuntimeException("Refresh token not found"));
 
     }

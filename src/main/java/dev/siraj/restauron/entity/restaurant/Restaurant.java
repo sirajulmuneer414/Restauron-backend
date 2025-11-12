@@ -4,12 +4,17 @@ import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.users.Employee;
 import dev.siraj.restauron.entity.users.Owner;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class  Restaurant {
+@Getter
+@Setter
+public class Restaurant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +23,7 @@ public class  Restaurant {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true) // Email should be unique
     private String email;
 
     @Column(nullable = false)
@@ -32,111 +37,28 @@ public class  Restaurant {
 
     private String pincode;
 
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private AccountStatus status;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "owner_id",referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
     private Owner owner;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Employee> employees;
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @ToString.Exclude // IMPORTANT: Prevents infinite loops in toString()
+    private List<Employee> employees = new ArrayList<>();
 
-    public Restaurant(){
-        employees = new ArrayList<>();
-    }
 
-    public Long getId() {
-        return id;
-    }
+    // --- Helper methods for bidirectional relationship ---
+    // These are good practice for keeping both sides of the relationship in sync
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getDistrict() {
-        return district;
-    }
-
-    public void setDistrict(String district) {
-        this.district = district;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public String getPincode() {
-        return pincode;
-    }
-
-    public void setPincode(String pincode) {
-        this.pincode = pincode;
-    }
-
-    public List<Employee> getEmployees() {
-        return employees;
-    }
-
-    public void setEmployeesList(List<Employee> employees) {
-        this.employees = employees;
-    }
-
-    public void addEmployee(Employee employee){
-        employees.add(employee);
+    public void addEmployee(Employee employee) {
+        this.employees.add(employee);
         employee.setRestaurant(this);
     }
 
-    public void removeEmployee(Employee employee){
-        employees.remove(employee);
+    public void removeEmployee(Employee employee) {
+        this.employees.remove(employee);
         employee.setRestaurant(null);
-    }
-
-    public Owner getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Owner owner) {
-        this.owner = owner;
-    }
-
-    public AccountStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AccountStatus status) {
-        this.status = status;
     }
 }

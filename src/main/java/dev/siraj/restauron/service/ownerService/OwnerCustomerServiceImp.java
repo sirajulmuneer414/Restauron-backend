@@ -6,6 +6,7 @@ import dev.siraj.restauron.DTO.owner.customerManagement.CustomerDetailDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.CustomerResponseDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.UpdateCustomerDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.UpdateStatusDto;
+import dev.siraj.restauron.DTO.owner.orderManagement.CustomerSearchResultDto;
 import dev.siraj.restauron.entity.blockAndUnblock.CustomerBlock;
 import dev.siraj.restauron.entity.blockAndUnblock.CustomerUnblockRequest;
 import dev.siraj.restauron.entity.enums.AccountStatus;
@@ -204,9 +205,41 @@ public class OwnerCustomerServiceImp implements OwnerCustomerService {
 
     }
 
+    @Override
+    public CustomerSearchResultDto findCustomerForOwner(String phone, String email) {
+        if (StringUtils.hasText(phone)) {
+            Customer customer = customerRepository.findByUser_Phone(phone).orElse(null);
+
+            if(customer != null){
+                return convertToSearchResultDto(customer);
+            }
+
+        }
+        if (StringUtils.hasText(email)) {
+            Customer customer = customerRepository.findByUser_Email(email).orElse(null);
+
+            if(customer != null){
+                return convertToSearchResultDto(customer);
+            }
+        }
+        return null;
+    }
+
     private Customer findCustomerById(Long customerId) {
         return customerRepository.findById(customerId)
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found with ID: " + customerId));
+    }
+
+    //          HELPER METHODS              //
+
+
+    private CustomerSearchResultDto convertToSearchResultDto(Customer customer) {
+        return new CustomerSearchResultDto(
+                idEncryptionService.encryptLongId(customer.getId()),
+                customer.getUser().getName(),
+                customer.getUser().getPhone(),
+                customer.getUser().getEmail() // Assuming Customer entity has getEmail()
+        );
     }
 
     private CustomerDetailDto mapToDetailDto(Customer customer) {

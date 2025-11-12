@@ -3,13 +3,14 @@ package dev.siraj.restauron.service.menuManagement.menuItemService;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
 import dev.siraj.restauron.DTO.owner.menuManagement.MenuItemRequestDto;
 import dev.siraj.restauron.DTO.owner.menuManagement.MenuItemResponseDto;
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.entity.menuManagement.Category;
 import dev.siraj.restauron.entity.menuManagement.MenuItem;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.respository.menuManagement.categoryRepo.CategoryRepository;
 import dev.siraj.restauron.respository.menuManagement.menuItemRepo.MenuItemRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.service.cloudinaryService.ImageUploadService;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -20,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class MenuItemServiceImp implements MenuItemService{
@@ -29,6 +30,7 @@ public class MenuItemServiceImp implements MenuItemService{
     @Autowired private RestaurantRepository restaurantRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private MenuItemRepository menuItemRepository;
+    @Autowired private ImageUploadService imageUploadService;
 
 
     /**
@@ -51,17 +53,20 @@ public class MenuItemServiceImp implements MenuItemService{
         menuItem.setName(request.getName());
         menuItem.setDescription(request.getDescription());
         menuItem.setPrice(request.getPrice());
-        menuItem.setImageUrl(request.getImageUrl());
+        if(request.getImageFile() != null){
+            String menuItemImage = imageUploadService.imageUploader(request.getImageFile(), "MenuItem-"+restaurant.getId());
+            menuItem.setImageUrl(menuItemImage);
+        }
         menuItem.setVegetarian(request.getIsVegetarian());
         menuItem.setCategory(category);
         menuItem.setRestaurant(restaurant);
-        menuItem.setStatus(ItemStatus.AVAILABLE); // Default status
+        menuItem.setStatus(AvailabilityStatus.AVAILABLE); // Default status
         menuItem.setAvailable(true);
 
         menuItemRepository.save(menuItem);
 
         category.addedMenuItem();
-        category.setStatus(ItemStatus.AVAILABLE);
+        category.setStatus(AvailabilityStatus.AVAILABLE);
 
         categoryRepository.save(category);
     }
@@ -82,6 +87,7 @@ public class MenuItemServiceImp implements MenuItemService{
     private MenuItemResponseDto mapToDto(MenuItem menuItem) {
         MenuItemResponseDto dto = new MenuItemResponseDto();
         dto.setEncryptedId(idEncryptionService.encryptLongId(menuItem.getId()));
+        dto.setMenuItemId(menuItem.getId());
         dto.setName(menuItem.getName());
         dto.setDescription(menuItem.getDescription());
         dto.setPrice(menuItem.getPrice());
@@ -92,6 +98,7 @@ public class MenuItemServiceImp implements MenuItemService{
         dto.setCategoryName(menuItem.getCategory().getName());
         return dto;
     }
+
 
     /**
      *
@@ -163,7 +170,11 @@ public class MenuItemServiceImp implements MenuItemService{
         menuItem.setName(request.getName());
         menuItem.setDescription(request.getDescription());
         menuItem.setPrice(request.getPrice());
-        menuItem.setImageUrl(request.getImageUrl());
+        if(request.getImageFile() != null){
+            if(!menuItem.getImageUrl().isEmpty()) imageUploadService.deleteImageByUrl(menuItem.getImageUrl());
+            String menuItemImage = imageUploadService.imageUploader(request.getImageFile(), "MenuItem-"+menuItem.getRestaurant().getId());
+            menuItem.setImageUrl(menuItemImage);
+        }
         menuItem.setVegetarian(request.getIsVegetarian());
 
         // If category needs to be changed
@@ -171,8 +182,8 @@ public class MenuItemServiceImp implements MenuItemService{
         if (!menuItem.getCategory().getId().equals(categoryId)) {
             Category oldCategory = menuItem.getCategory();
             oldCategory.removedMenuItem();
-            if(!menuItemRepository.existsByCategoryIdAndStatus(oldCategory.getId(), ItemStatus.AVAILABLE)){
-                oldCategory.setStatus(ItemStatus.UNAVAILABLE);
+            if(!menuItemRepository.existsByCategoryIdAndStatus(oldCategory.getId(), AvailabilityStatus.AVAILABLE)){
+                oldCategory.setStatus(AvailabilityStatus.UNAVAILABLE);
                 categoryRepository.save(oldCategory);
             }
 
@@ -180,7 +191,7 @@ public class MenuItemServiceImp implements MenuItemService{
                     .orElseThrow(() -> new EntityNotFoundException("New category not found."));
 
             newCategory.addedMenuItem();
-            newCategory.setStatus(ItemStatus.AVAILABLE);
+            newCategory.setStatus(AvailabilityStatus.AVAILABLE);
 
             categoryRepository.save(newCategory);
 
@@ -206,15 +217,15 @@ public class MenuItemServiceImp implements MenuItemService{
         Category category = menuItem.getCategory();
 
         if(isAvailable){
-            menuItem.setStatus(ItemStatus.AVAILABLE);
+            menuItem.setStatus(AvailabilityStatus.AVAILABLE);
         }else{
-            menuItem.setStatus(ItemStatus.UNAVAILABLE);
+            menuItem.setStatus(AvailabilityStatus.UNAVAILABLE);
         }
 
         menuItemRepository.save(menuItem);
 
-        if(!menuItemRepository.existsByCategoryIdAndStatus(category.getId(), ItemStatus.AVAILABLE)){
-            category.setStatus(ItemStatus.UNAVAILABLE);
+        if(!menuItemRepository.existsByCategoryIdAndStatus(category.getId(), AvailabilityStatus.AVAILABLE)){
+            category.setStatus(AvailabilityStatus.UNAVAILABLE);
         }
 
         categoryRepository.save(category);
@@ -233,14 +244,31 @@ public class MenuItemServiceImp implements MenuItemService{
 
         Category category = menuItem.getCategory();
 
+        String imageUrl = null;
+
+        if(!menuItem.getImageUrl().isEmpty()) imageUrl = menuItem.getImageUrl();
+
         menuItemRepository.delete(menuItem);
+
+        imageUploadService.deleteImageByUrl(imageUrl);
 
         category.removedMenuItem();
 
-        if(!menuItemRepository.existsByCategoryIdAndStatus(category.getId(), ItemStatus.AVAILABLE)){
-            category.setStatus(ItemStatus.UNAVAILABLE);
+        if(!menuItemRepository.existsByCategoryIdAndStatus(category.getId(), AvailabilityStatus.AVAILABLE)){
+            category.setStatus(AvailabilityStatus.UNAVAILABLE);
         }
 
         categoryRepository.save(category);
+    }
+
+    @Override
+    public List<MenuItemResponseDto> getMenuItemListThroughNameSearch(String restaurantEncryptedId, String menuItemName) {
+
+        Long restaurantId = idEncryptionService.decryptToLongId(restaurantEncryptedId);
+
+        List<MenuItem> menuItemList = menuItemRepository.findByRestaurantIdAndNameContainingIgnoreCase(restaurantId, menuItemName);
+
+
+        return menuItemList.stream().map(this::mapToDto).toList();
     }
 }

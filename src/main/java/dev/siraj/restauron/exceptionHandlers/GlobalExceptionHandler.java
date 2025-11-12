@@ -13,12 +13,7 @@ import java.nio.file.AccessDeniedException;
 public class GlobalExceptionHandler {
 
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> generalExceptionHandler(Exception e){
 
-
-        return new ResponseEntity<>("Error - "+e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -33,5 +28,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Error - "+e.getMessage(),HttpStatus.NOT_FOUND);
     }
 
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> generalExceptionHandler(Exception e){
+
+
+        return new ResponseEntity<>("Error - "+e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }

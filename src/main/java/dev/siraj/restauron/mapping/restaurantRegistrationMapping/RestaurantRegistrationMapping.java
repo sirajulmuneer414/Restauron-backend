@@ -42,8 +42,6 @@ public class RestaurantRegistrationMapping {
         restaurantRegistration.setOwnerEmail(restaurantRegistrationDto.getEmail());
         restaurantRegistration.setRestaurantAddress(restaurantRegistrationDto.getRestaurantAddress());
         restaurantRegistration.setRestaurantPhone(restaurantRegistrationDto.getRestaurantPhone());
-        restaurantRegistration.setOwnerAdhaarNo(restaurantRegistrationDto.getAdhaarNumber());
-        restaurantRegistration.setOwnerAdhaarPhoto(restaurantRegistrationDto.getAdhaarPhoto());
         restaurantRegistration.setDistrict(restaurantRegistrationDto.getDistrict());
         restaurantRegistration.setOwnerPhone(restaurantRegistrationDto.getPhone());
         restaurantRegistration.setPincode(restaurantRegistrationDto.getPincode());
@@ -114,7 +112,6 @@ public class RestaurantRegistrationMapping {
             restaurant.setPhone(restaurantRegistration.getRestaurantPhone());
         }
         restaurant.setOwner(owner);
-        restaurant.setEmployeesList(new ArrayList<>());
         restaurant.setDistrict(restaurantRegistration.getDistrict());
         restaurant.setState(restaurantRegistration.getState());
         restaurant.setPincode(restaurantRegistration.getPincode());

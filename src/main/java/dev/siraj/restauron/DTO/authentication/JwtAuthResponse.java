@@ -3,11 +3,11 @@ package dev.siraj.restauron.DTO.authentication;
 public class JwtAuthResponse {
     private String token;
     private String tokenType = "Bearer";
-    private String refreshToken;
+    private String newRefreshToken;
 
     public JwtAuthResponse(String token,String refreshToken){
         this.token = token;
-        this.refreshToken = refreshToken;
+        this.newRefreshToken = refreshToken;
     }
 
 
@@ -28,11 +28,11 @@ public class JwtAuthResponse {
         this.tokenType = tokenType;
     }
 
-    public String getRefreshToken() {
-        return refreshToken;
+    public String getNewRefreshToken() {
+        return newRefreshToken;
     }
 
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+    public void setNewRefreshToken(String newRefreshToken) {
+        this.newRefreshToken = newRefreshToken;
     }
 }

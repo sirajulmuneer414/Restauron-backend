@@ -90,7 +90,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
     }
 
     @Override
-    public String login(LoginRequestDto requestDto) {
+    public AuthResponseDto login(LoginRequestDto requestDto) {
 
         log.info("Inside the normal login for customer, email : {}",requestDto.getEmail());
         UserAll user = userRepository.findByEmail(requestDto.getEmail());
@@ -105,7 +105,19 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        return jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(), user.getId());
+        String token = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(), user.getId());
+
+        AuthResponseDto dto = new AuthResponseDto();
+
+        dto.setToken(token);
+
+        Customer customer = customerRepository.findByUser(user);
+
+        dto.setSpecialId(idEncryptionService.encryptLongId(customer.getId()));
+
+
+
+        return dto;
     }
 
     @Override
@@ -127,9 +139,9 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
             String name = (String) payload.get("name");
 
    // Temporarily commented out till setting up encrypted Restaurant id setup
- //           Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
-            Long restaurantId = Long.parseLong(encryptedId);
-
+            Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
+         //   Long restaurantId = Long.parseLong(encryptedId);
+            Long customerId = null;
             UserAll user = userRepository.findByEmail(email);
             if (user == null) {
                 UserAll newUser = new UserAll();
@@ -144,9 +156,13 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
                 newCustomer.setUser(savedUser);
                 newCustomer.setRestaurant(restaurant);
-                customerRepository.save(newCustomer);
+                Customer customer = customerRepository.save(newCustomer);
+                customerId = customer.getId();
 
                 user = savedUser;
+            }else{
+                Customer customer = customerRepository.findByUser(user);
+                customerId = customer.getId();
             }
 
             log.info("Verified for user : {}, email : {}", user.getName(), user.getEmail());
@@ -154,7 +170,11 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
             String token =  jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId());
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
-            return new AuthResponseDto(token, refreshToken);
+            AuthResponseDto authResponseDto = new AuthResponseDto(token, refreshToken);
+
+            authResponseDto.setSpecialId(idEncryptionService.encryptLongId(customerId));
+
+            return authResponseDto;
         } catch (Exception e) {
             log.error("Google sign-in error", e);
             throw new RuntimeException("Google sign-in failed.");
@@ -172,7 +192,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
     }
 
     @Transactional
-    public String verifyAndRegister(RegisterVerifyRequestDto requestDto, String encryptedRestaurantId) {
+    public AuthResponseDto verifyAndRegister(RegisterVerifyRequestDto requestDto, String encryptedRestaurantId) {
         if (!otpService.verifyOtp(requestDto.getEmail(), requestDto.getOtp())) {
             throw new BadCredentialsException("The OTP you entered is incorrect.");
         }
@@ -206,9 +226,16 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
         Customer customer = new Customer();
         customer.setUser(savedUser);
         customer.setRestaurant(restaurant);
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
 
-        return jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(), savedUser.getId());
+        String token = jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(), savedUser.getId());
+
+        AuthResponseDto dto = new AuthResponseDto();
+        dto.setToken(token);
+
+        dto.setSpecialId(idEncryptionService.encryptLongId(customer.getId()));
+
+        return dto;
 
     }
 

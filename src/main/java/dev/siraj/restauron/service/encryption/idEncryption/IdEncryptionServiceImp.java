@@ -60,6 +60,10 @@ public class IdEncryptionServiceImp implements IdEncryptionService{
             return null;
         }
 
+        if(encryptedId.length() < 4) {
+            return Long.parseLong(encryptedId);
+        }
+
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
 

@@ -15,4 +15,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant,Long>, Jp
     Restaurant findByOwner(Owner owner);
 
     Optional<Restaurant> findByOwner_User_Id(Long ownerUserId);
+
+    Optional<Restaurant> findById(Long id);
 }

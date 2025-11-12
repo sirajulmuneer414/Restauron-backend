@@ -1,5 +1,5 @@
 package dev.siraj.restauron.entity.enums;
 
-public enum ItemStatus {
+public enum AvailabilityStatus {
         AVAILABLE, LOW, UNAVAILABLE, RESTOCKING
 }

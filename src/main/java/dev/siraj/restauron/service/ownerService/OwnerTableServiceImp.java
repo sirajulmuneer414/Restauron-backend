@@ -50,6 +50,7 @@ public class OwnerTableServiceImp implements OwnerTableService {
 
             TableResponseDto dto = new TableResponseDto();
             dto.setEncryptedId(idEncryptionService.encryptLongId(item.getId()));
+            dto.setTableId(item.getId());
             dto.setName(item.getName());
 
             log.info("{}. {}", dto.getEncryptedId(), dto.getName());

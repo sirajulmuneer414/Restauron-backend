@@ -23,7 +23,6 @@ import java.io.IOException;
 
 
 @Component
-@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
@@ -42,7 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         if (request.getMethod().equals("OPTIONS")) {
-            log.info("Reached the filter for OPTIONS redirection");
+            logger.info("Reached the filter for OPTIONS redirection");
             filterChain.doFilter(request, response); // Allow OPTIONS requests to pass through
             return;
         }

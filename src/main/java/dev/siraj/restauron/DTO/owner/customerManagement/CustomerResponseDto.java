@@ -13,6 +13,7 @@ public class CustomerResponseDto {
     private String email;
     private String phone;
     private AccountStatus status;
+    private String profilePictureUrl;
 
     private String blockSubject;
     private String blockDescription;

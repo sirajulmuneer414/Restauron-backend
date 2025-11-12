@@ -8,5 +8,8 @@ public class AuthResponseDto
 {
     private String token;
     private RefreshToken refreshToken;
+    private String specialId;
+
+    public AuthResponseDto(){}
     public AuthResponseDto(String token, RefreshToken refreshToken){this.token = token; this.refreshToken = refreshToken;}
 }

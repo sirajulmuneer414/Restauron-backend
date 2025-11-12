@@ -4,7 +4,7 @@ package dev.siraj.restauron.service.customer.customerMenuService;
 import dev.siraj.restauron.DTO.restaurant.CategoryDto;
 import dev.siraj.restauron.DTO.restaurant.MenuDto;
 import dev.siraj.restauron.DTO.restaurant.MenuItemDto;
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.entity.menuManagement.Category;
 import dev.siraj.restauron.entity.menuManagement.MenuItem;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
@@ -13,7 +13,6 @@ import dev.siraj.restauron.respository.menuManagement.menuItemRepo.MenuItemRepos
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +39,7 @@ public class CustomerMenuServiceImp implements CustomerMenuService {
         menuDto.setRestaurantName(restaurant.getName());
 
         // Fetch all active categories for the restaurant and map them
-        menuDto.setCategories(categoryRepository.findByRestaurantIdAndStatus(restaurantId, ItemStatus.AVAILABLE)
+        menuDto.setCategories(categoryRepository.findByRestaurantIdAndStatus(restaurantId, AvailabilityStatus.AVAILABLE)
                 .stream()
                 .map(this::mapToCategoryDto)
                 .collect(Collectors.toList()));

@@ -6,13 +6,17 @@ import dev.siraj.restauron.DTO.owner.customerManagement.CustomerDetailDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.CustomerResponseDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.UpdateCustomerDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.UpdateStatusDto;
+import dev.siraj.restauron.DTO.owner.orderManagement.CustomerSearchResultDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
 import dev.siraj.restauron.service.ownerService.interfaces.OwnerCustomerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RolesAllowed(roles = {"OWNER"})
@@ -77,6 +81,24 @@ public class OwnerCustomerController {
         customerService.deleteCustomer(customerEncryptedId);
         return ResponseEntity.noContent().build();
     }
+
+
+    @GetMapping("/check")
+    public ResponseEntity<CustomerSearchResultDto> checkCustomerExists(
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String email) {
+
+        CustomerSearchResultDto customerDto = customerService.findCustomerForOwner(phone, email);
+
+        if(customerDto == null){
+            return ResponseEntity.noContent().build();
+        }
+
+        return new ResponseEntity<>(customerDto, HttpStatus.OK);
+
+    }
+
+
 }
 
 

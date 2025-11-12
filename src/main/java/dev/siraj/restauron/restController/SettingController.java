@@ -9,6 +9,7 @@ import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.registrarion.adminRegistrationService.adminRegistrationInterface.AdminRegistrationService;
+import dev.siraj.restauron.service.reservation.reservationAvailability.weeklyAvailabilityService.WeeklyAvailabilityService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class SettingController implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final AdminRegistrationService adminRegistrationService;
+    private final WeeklyAvailabilityService weeklyAvailabilityService;
     private final String ADMIN_SECURITY_CODE;
 
     private static final String ADMIN_EMAIL_ID = "Admin@restauron.com";
@@ -40,17 +42,20 @@ public class SettingController implements CommandLineRunner {
             PasswordEncoder passwordEncoder,
             UserService userService,
             AdminRegistrationService adminRegistrationService,
+            WeeklyAvailabilityService weeklyAvailabilityService,
             @Value("${app.admin-password}") String adminSecurityCode) {
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.adminRegistrationService = adminRegistrationService;
         this.ADMIN_SECURITY_CODE = adminSecurityCode;
+        this.weeklyAvailabilityService = weeklyAvailabilityService;
     }
     @Override
     @Transactional
     public void run(String... args) throws Exception {
 
         if(userService.userExistsByEmailId(ADMIN_EMAIL_ID)){
+
 
             log.info("Admin already exists, exiting the method");
             return;}

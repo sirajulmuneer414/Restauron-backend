@@ -3,9 +3,6 @@ package dev.siraj.restauron.restController.authentication;
 import dev.siraj.restauron.DTO.authentication.EmailPasswordDto;
 import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
 import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
-import dev.siraj.restauron.DTO.customer.auth.AuthResponseDto;
-import dev.siraj.restauron.entity.authentication.RefreshToken;
-import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.service.authentication.AuthenticationService;
 import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
@@ -61,7 +58,12 @@ public class AuthenticationController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<JwtAuthResponse> refreshToken(@RequestBody RefreshTokenRequestDto request) {
+
+        log.info("Inside the refresh-token controller to fetch refresh token {}", request.getOldRefreshToken());
+
         JwtAuthResponse dto = authenticationService.recreateAfterRefreshToken(request);
+
+        log.info("successfully created a new token through refresh token {} {}",dto.getNewRefreshToken(), dto.getToken());
 
         return new ResponseEntity<>(dto,HttpStatus.OK);
 

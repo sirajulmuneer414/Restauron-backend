@@ -1,6 +1,6 @@
 package dev.siraj.restauron.entity.menuManagement;
 
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class Category {
     private String description;
 
     @Enumerated(value = EnumType.STRING)
-    private ItemStatus status;  // The enums are AVAILABLE, UNAVAILABLE, LOW, RESTOCKING
+    private AvailabilityStatus status;  // The enums are AVAILABLE, UNAVAILABLE, LOW, RESTOCKING
 
     @ManyToOne
     private Restaurant restaurant;

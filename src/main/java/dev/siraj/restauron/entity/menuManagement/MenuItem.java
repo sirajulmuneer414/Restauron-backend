@@ -1,6 +1,6 @@
 package dev.siraj.restauron.entity.menuManagement;
 
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -29,7 +29,7 @@ public class MenuItem {
     private boolean isAvailable = true; // Default to true upon creation
 
     @Enumerated(EnumType.STRING)
-    private ItemStatus status;
+    private AvailabilityStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)

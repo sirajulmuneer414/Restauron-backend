@@ -3,7 +3,7 @@ package dev.siraj.restauron.restController.menuManagement;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
 import dev.siraj.restauron.DTO.owner.menuManagement.CategoryResponseDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.service.menuManagement.categoryService.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,9 +87,9 @@ public class CategoryController {
         String statusStr = payload.get("status");
         log.info("Request to update status for category ID: {} to {}", categoryEncryptedId, statusStr);
 
-        ItemStatus newStatus;
+        AvailabilityStatus newStatus;
         try {
-            newStatus = ItemStatus.valueOf(statusStr.toUpperCase());
+            newStatus = AvailabilityStatus.valueOf(statusStr.toUpperCase());
         } catch (IllegalArgumentException | NullPointerException e) {
             return new ResponseEntity<>("Invalid status provided. Must be one of: AVAILABLE, UNAVAILABLE, LOW, RESTOCKING.", HttpStatus.BAD_REQUEST);
         }

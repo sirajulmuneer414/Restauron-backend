@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 /*
         This class is to set rest controller for dealing with all request related to employees
         from the owner side
@@ -52,9 +53,25 @@ public class OwnerEmployeeController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addEmployee(@RequestBody EmployeeRegistrationRequestDto dto, @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId){
+    public ResponseEntity<String> addEmployee(@RequestParam("name") String name,
+    @RequestParam("personalEmail") String personalEmail,
+    @RequestParam("phone") String phone,
+    @RequestParam("aadhaarNo") String aadhaarNo,
+    @RequestParam("aadhaarImage") MultipartFile aadhaarImage,
+    @RequestParam("companyEmail") String companyEmail,
+    @RequestParam("generatedPassword") String generatedPassword,
+    @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId){
 
-        log.info("Received request to add employee {}", dto.getName());
+        log.info("Received request to add employee {}", name);
+
+        EmployeeRegistrationRequestDto dto = new EmployeeRegistrationRequestDto();
+        dto.setName(name);
+        dto.setPersonalEmail(personalEmail);
+        dto.setPhone(phone);
+        dto.setAadhaarNo(aadhaarNo);
+        dto.setAadhaarImage(aadhaarImage);
+        dto.setCompanyEmail(companyEmail);
+        dto.setGeneratedPassword(generatedPassword);
 
         try{
             employeeManagementService.addEmployee(dto, encryptedRestaurantId);
@@ -111,11 +128,12 @@ public class OwnerEmployeeController {
 
     @DeleteMapping("/delete/{encryptedId}")
     public ResponseEntity<String> deleteEmployee(
-            @PathVariable String encryptedId
+            @PathVariable String encryptedId,
+            @RequestHeader("X-Restaurant-Id") String restaurantEncryptedId
     ) {
         log.info("Request received to delete employee with encrypted ID: {}", encryptedId);
         try {
-            employeeManagementService.deleteEmployee(encryptedId);
+            employeeManagementService.deleteEmployee(encryptedId, restaurantEncryptedId);
             return ResponseEntity.ok("Employee has been deleted successfully.");
         } catch (EntityNotFoundException e) {
             log.warn("Delete failed. Could not find employee with encrypted ID {}: {}", encryptedId, e.getMessage());

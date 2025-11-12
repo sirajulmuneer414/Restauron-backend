@@ -16,4 +16,9 @@ public interface CustomerRepository extends JpaRepository<Customer,Long>, JpaSpe
     void deleteByUser(UserAll user);
 
     Optional<Customer> findByUserIdAndRestaurantId(Long customerEmail, Long restaurantId);
+
+
+    Optional<Customer> findByUser_Phone(String customerPhone);
+
+    Optional<Customer> findByUser_Email(String email);
 }

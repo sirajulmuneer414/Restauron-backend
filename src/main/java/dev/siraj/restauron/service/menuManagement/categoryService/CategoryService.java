@@ -1,7 +1,7 @@
 package dev.siraj.restauron.service.menuManagement.categoryService;
 
 import dev.siraj.restauron.DTO.owner.menuManagement.CategoryResponseDto;
-import dev.siraj.restauron.entity.enums.ItemStatus;
+import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import org.springframework.data.domain.Page;
 
 import java.util.Map;
@@ -15,7 +15,7 @@ public interface CategoryService {
 
     void updateCategory(String categoryEncryptedId, String newName, String newDescription);
 
-    void updateCategoryStatus(String categoryEncryptedId, ItemStatus status);
+    void updateCategoryStatus(String categoryEncryptedId, AvailabilityStatus status);
 
     void deleteCategory(String categoryEncryptedId) throws Exception;
 }

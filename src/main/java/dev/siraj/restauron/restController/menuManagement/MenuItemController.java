@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -26,16 +27,33 @@ public class MenuItemController {
          * Creates a new menu item.
          */
         @PostMapping("/create")
-        public ResponseEntity<String> createMenuItem(@RequestBody MenuItemRequestDto request, @RequestHeader("X-Restaurant-Id") String restaurantEncryptedId) {
-            log.info("Request to create menu item: {}", request.getName());
+        public ResponseEntity<String> createMenuItem(
+                @RequestParam("name") String name,
+                @RequestParam("description") String description,
+                @RequestParam("price") Double price,
+                @RequestParam("isVegetarian") Boolean isVegetarian,
+                @RequestParam("categoryEncryptedId") String categoryEncryptedId,
+                @RequestParam(value = "imageFile", required = false) MultipartFile imageFile, // Optional
+                @RequestHeader("X-Restaurant-Id") String restaurantEncryptedId
+        ) {
+            // Build DTO or pass params to service
 
-            menuItemService.createMenuItem(request, restaurantEncryptedId);
 
-            log.info("Menu item created successfully");
+
+            MenuItemRequestDto dto = new MenuItemRequestDto();
+            dto.setName(name);
+            dto.setDescription(description);
+            dto.setPrice(price);
+            dto.setIsVegetarian(isVegetarian);
+            dto.setCategoryEncryptedId(categoryEncryptedId);
+            dto.setImageFile(imageFile);
+
+            menuItemService.createMenuItem(dto, restaurantEncryptedId);
+
             return new ResponseEntity<>("Menu item created successfully.", HttpStatus.CREATED);
         }
 
-        /**
+    /**
          * Fetches a single menu item by its encrypted ID.
          */
         @GetMapping("/fetch/{menuItemEncryptedId}")

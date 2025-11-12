@@ -11,6 +11,8 @@ import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService
 import dev.siraj.restauron.service.customer.customerAuthService.CustomerAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,13 +31,15 @@ public class CustomerAuthController {
             ){
         log.info("Inside the login controller for customer : {}", requestDto.getEmail());
 
-        String token = customerAuthService.login(requestDto);
+        AuthResponseDto dto = customerAuthService.login(requestDto);
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(requestDto.getEmail());
 
         log.info("completed logging in for the user : {}",requestDto.getEmail());
 
-        return ResponseEntity.ok(new AuthResponseDto(token, refreshToken));
+        dto.setRefreshToken(refreshToken);
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("/google")
@@ -51,7 +55,7 @@ public class CustomerAuthController {
         log.info("Completed logging in for customer through google, token ; {}", requestDto.getToken());
         log.info("The resulting JWT token : {}", token);
 
-        return ResponseEntity.ok(token);
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
     @PostMapping("/send-otp")
@@ -68,11 +72,13 @@ public class CustomerAuthController {
             @RequestBody RegisterVerifyRequestDto requestDto,
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
         log.info("Inside the register and verify controller for customer : {}", requestDto.getName());
-        String token = customerAuthService.verifyAndRegister(requestDto, encryptedRestaurantId);
+        AuthResponseDto dto = customerAuthService.verifyAndRegister(requestDto, encryptedRestaurantId);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(requestDto.getEmail());
 
+        dto.setRefreshToken(refreshToken);
+
         log.info("Register and verification completed successfully");
-        return ResponseEntity.ok(new AuthResponseDto(token, refreshToken));
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
 }
