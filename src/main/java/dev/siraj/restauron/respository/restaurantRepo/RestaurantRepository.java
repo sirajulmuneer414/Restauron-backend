@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +18,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant,Long>, Jp
     Optional<Restaurant> findByOwner_User_Id(Long ownerUserId);
 
     Optional<Restaurant> findById(Long id);
+
+    List<Restaurant> findTop5ByOrderByCreatedAtDesc();
 }

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+    // REST controller for general owner-related endpoints
+
 @RestController
 @RequestMapping("/owner")
 @RolesAllowed(roles = {"OWNER"})
@@ -18,6 +20,12 @@ public class OwnerGeneralController {
     @Autowired
     private RestaurantService restaurantService;
 
+    /**
+     * Endpoint to get restaurant details for the owner after login.
+     *
+     * @param ownerUserId Encrypted owner user ID from path variable
+     * @return ResponseEntity containing RestaurantReduxSettingDto
+     */
     @GetMapping("/get-restaurant-details/{ownerUserId}")
     public ResponseEntity<?> getRestaurantDetailsToSet(@PathVariable String ownerUserId){
 
@@ -31,5 +39,19 @@ public class OwnerGeneralController {
         log.info("Finished fetching the restaurant details");
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+    /**
+     * Endpoint to get the owner's contact information for the restaurant.
+     *
+     * @param encryptedRestaurantId Encrypted restaurant ID from request header
+     * @return ResponseEntity containing owner's contact information
+     */
+    @GetMapping("/contact-info")
+    public ResponseEntity<?> getOwnerContactInfo(@RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
+        log.info("Fetching contact info for restaurant ID: {}", encryptedRestaurantId);
+        String contactInfo = restaurantService.getOwnerContactInfo(encryptedRestaurantId);
+        return new ResponseEntity<>(contactInfo, HttpStatus.OK);
+    }
+
 
 }

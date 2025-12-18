@@ -10,4 +10,6 @@ public class Slots {
     private String slotTo;
 
     private int maxReservation;
+
+    private int maxNoOfPeoplePerReservation;
 }

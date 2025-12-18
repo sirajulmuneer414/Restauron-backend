@@ -76,7 +76,7 @@ public class RegistrationController {
 
     @PostMapping("/restaurant")
     @Transactional
-    public ResponseEntity<Boolean> registerRestaurant(@RequestBody RestaurantRegistrationDto restaurantRegistrationDto){
+    public ResponseEntity<Boolean> registerRestaurant(@ModelAttribute RestaurantRegistrationDto restaurantRegistrationDto){
 
         System.out.println(restaurantRegistrationDto.getRestaurantEmail());
         System.out.println(restaurantRegistrationDto.getPassword());

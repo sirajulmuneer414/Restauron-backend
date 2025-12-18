@@ -8,9 +8,10 @@ import dev.siraj.restauron.DTO.orders.OrderItemRequest;
 import dev.siraj.restauron.DTO.orders.OrderPageRequestDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderSummaryDto;
-import dev.siraj.restauron.DTO.owner.orderManagement.OwnerOrderRequest;
+import dev.siraj.restauron.DTO.common.orderManagement.OrderRequest;
 
 // Entities
+import dev.siraj.restauron.DTO.websocket.notification.OrderAlertDTO;
 import dev.siraj.restauron.entity.enums.OrderStatus;
 import dev.siraj.restauron.entity.enums.OrderType;
 import dev.siraj.restauron.entity.enums.PaymentMode;
@@ -34,6 +35,7 @@ import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.orderManagement.interfaces.OrderService;
 
 // Exceptions
+import dev.siraj.restauron.service.websocket.notification.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 
 // Spring & Java
@@ -68,6 +70,7 @@ public class OrderServiceImp implements OrderService {
     private final MenuItemRepository menuItemRepository;
     private final IdEncryptionService idEncryptionService;
     private final RestaurantTableRepository restaurantTableRepository;
+    private final NotificationService notificationService;
     private final UserRepository userRepository;
 
     @Autowired
@@ -75,6 +78,7 @@ public class OrderServiceImp implements OrderService {
                            RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository,
                            IdEncryptionService idEncryptionService,
                            RestaurantTableRepository restaurantTableRepository,
+                           NotificationService notificationService,
                            UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
@@ -82,6 +86,7 @@ public class OrderServiceImp implements OrderService {
         this.menuItemRepository = menuItemRepository;
         this.idEncryptionService = idEncryptionService;
         this.restaurantTableRepository = restaurantTableRepository;
+        this.notificationService = notificationService;
         this.userRepository = userRepository;
     }
 
@@ -119,7 +124,7 @@ public class OrderServiceImp implements OrderService {
      */
     @Transactional
     @Override
-    public OrderDetailDto createManualOrder(String encryptedRestaurantId, OwnerOrderRequest request) {
+    public OrderDetailDto createManualOrder(String encryptedRestaurantId, OrderRequest request) {
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found."));
@@ -163,12 +168,20 @@ public class OrderServiceImp implements OrderService {
         // 2. Process items
         Map<MenuItem, Integer> itemMap = processItems(
                 request.getItems(),
-                OwnerOrderRequest.ItemRequest::getMenuItemId, // Plain Long ID
-                OwnerOrderRequest.ItemRequest::getQuantity
+                item -> idEncryptionService.decryptToLongId(item.getEncryptedId()),
+                OrderRequest.ItemRequest::getQuantity
         );
 
         // 3. Pass the order to the helper to set items, total, and bill number
         Order savedOrder = buildAndSaveOrder(order, itemMap);
+
+        // 4. Send real-time alert to restaurant staff
+        try {
+            sendRealTimeAlert(savedOrder);
+        } catch (Exception e) {
+            log.error("Failed to send real-time order alert for Order ID: {}", savedOrder.getId(), e);
+        }
+
         return toOrderDetailDto(savedOrder);
     }
 
@@ -177,7 +190,7 @@ public class OrderServiceImp implements OrderService {
      */
     @Transactional
     @Override
-    public OrderDetailDto updateOrderStatus(String encryptedOrderId, String status) {
+    public OrderDetailDto updateOrderStatus(String encryptedOrderId, String status, String encryptedRestaurantId) {
         Long orderId = idEncryptionService.decryptToLongId(encryptedOrderId);
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
@@ -186,6 +199,7 @@ public class OrderServiceImp implements OrderService {
             OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
             order.setStatus(newStatus);
             Order updatedOrder = orderRepository.save(order);
+            notificationService.sendRefreshSignal(encryptedRestaurantId,"STATUS_UPDATE");
             return toOrderDetailDto(updatedOrder);
         } catch (IllegalArgumentException e) {
             throw new BadCredentialsException("Invalid status value provided: " + status);
@@ -499,5 +513,46 @@ public class OrderServiceImp implements OrderService {
         dto.setItems(itemResponses);
 
         return dto;
+    }
+
+    /**
+     * Sends a real-time order alert via WebSocket to the restaurant staff.
+     */
+    private void sendRealTimeAlert(Order order) {
+        OrderAlertDTO alert = new OrderAlertDTO();
+        alert.setOrderId(order.getId());
+        alert.setBillNumber(order.getBillNumber());
+        alert.setOrderType(order.getOrderType().toString());
+        alert.setTotalAmount(order.getTotalAmount());
+        alert.setItemCount(order.getItems().size());
+
+        // Handle Customer Name (Registered vs Temporary)
+        if (order.getCustomer() != null) {
+            alert.setCustomerName(order.getCustomer().getUser().getName());
+        } else {
+            alert.setCustomerName(order.getTemporaryCustomerName());
+        }
+
+        // Handle Table Number
+        if (order.getRestaurantTable() != null) {
+            alert.setTableNumber(String.valueOf(order.getRestaurantTable().getName()));
+        } else {
+            alert.setTableNumber("N/A");
+        }
+
+        // Create Items Summary (e.g., "2x Pizza, 1x Coke")
+        String summary = order.getItems().stream()
+                .limit(3) // Only show first 3 items to keep payload small
+                .map(item -> item.getQuantity() + "x " + item.getMenuItem().getName())
+                .collect(Collectors.joining(", "));
+
+        if (order.getItems().size() > 3) {
+            summary += " + " + (order.getItems().size() - 3) + " more";
+        }
+        alert.setItemsSummary(summary);
+        alert.setType("NEW_ORDER");
+
+        // Send!
+        notificationService.sendOrderAlert(order.getRestaurant().getId(), alert);
     }
 }

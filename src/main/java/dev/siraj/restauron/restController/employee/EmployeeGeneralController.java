@@ -1,8 +1,7 @@
 package dev.siraj.restauron.restController.employee;
 
 import dev.siraj.restauron.DTO.owner.RestaurantReduxSettingDto;
-import dev.siraj.restauron.service.employeeManagementService.EmployeeManagementService;
-import dev.siraj.restauron.service.employeeService.EmployeeService;
+import dev.siraj.restauron.service.employee.employeeService.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -6,6 +6,7 @@ import dev.siraj.restauron.entity.menuManagement.MenuItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
+public interface MenuItemRepository extends JpaRepository<MenuItem, Long> , JpaSpecificationExecutor<MenuItem> {
     Page<MenuItem> findByRestaurantIdAndNameContainingIgnoreCase(Long restaurantId, String name, Pageable pageable);
 
     List<MenuItem> findByRestaurantIdAndNameContainingIgnoreCase(Long restaurantId, String name);
@@ -33,4 +34,6 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     int updateStatusAndAvailabilityByCategoryId(@Param("categoryId") Long categoryId, @Param("newStatus") AvailabilityStatus newStatus, @Param("isAvailable") boolean isAvailable);
 
     Optional<List<MenuItem>> findByCategory(Category category);
+
+    List<MenuItem> findByRestaurantId(Long restaurantId);
 }

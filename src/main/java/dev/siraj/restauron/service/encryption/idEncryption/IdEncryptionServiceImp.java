@@ -74,7 +74,7 @@ public class IdEncryptionServiceImp implements IdEncryptionService{
             return Long.parseLong(new String(decryptedBytes, StandardCharsets.UTF_8));
         }
         catch (Exception e){
-            throw new IllegalArgumentException("Invalid encrypted Id");
+            throw new IllegalArgumentException("Invalid encrypted Id"+e.getMessage());
         }
 
 

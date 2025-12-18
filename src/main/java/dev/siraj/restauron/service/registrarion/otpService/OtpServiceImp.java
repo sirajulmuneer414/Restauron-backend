@@ -48,9 +48,13 @@ public class OtpServiceImp implements OtpService {
 
             String otp = generateOtp();
         System.out.println(otp);
-
-            String body = "Dear " + name + ",\n\nThank you for choosing to register your restaurant "+ restaurant +"with Restauron!\n\nYour OTP for restaurant registration is: " + otp + "\n\nPlease use this code to complete your registration process.\n\nBest regards,\nTeam Restauron";
-            emailService.sendEmail(email,body, "Restaurant Registration OTP");
+            emailService.sendOtpEmail(
+                    email,
+                    otp,
+                    name,
+                    restaurant,
+                    "Restauron - Registration OTP"
+            );
 
         OtpAndUser otpAndUser = new OtpAndUser(otp,email, LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
 
@@ -62,22 +66,6 @@ public class OtpServiceImp implements OtpService {
     }
 
 
-    @Override
-    public String sendOtpForAdminRegistration(String name, String email, Long adminId) {
-        String otp = generateOtp();
-
-        String body = "Dear " + name + ",\n\nThank you for choosing to register as an Admin "+"with Restauron!\n\nYour OTP for admin registration is: " + otp + "\n\nPlease use this code to complete your registration process.\n\nBest regards,\nTeam Restauron";
-        emailService.sendEmail(email,body,"Admin registration OTP");
-
-        System.out.println(otp);
-
-        OtpAndUser otpAndUser = new OtpAndUser(otp,email,LocalDateTime.now(),LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
-
-        otpRepository.save(otpAndUser);
-
-        return otp;
-
-    }
 
 
     @Override
@@ -117,42 +105,18 @@ public class OtpServiceImp implements OtpService {
            otpAndUser.setOtpCreatedTime(LocalDateTime.now());
            otpAndUser.setOtpExpirationTime(LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
 
-           String body = "Dear " + restaurantRegistration.getOwnerName() + ",\n\nThank you for choosing to register your restaurant " + restaurantRegistration.getRestaurantName() + "with Restauron!\n\nYour OTP for restaurant registration is: " + otp + "\n\nPlease use this code to complete your registration process.\n\nBest regards,\nTeam Restauron";
-
-           emailService.sendEmail(restaurantRegistration.getOwnerEmail(), body, "Restaurant Registration OTP resend");
+           emailService.sendOtpEmail(
+                   restaurantRegistration.getOwnerEmail(),
+                   otp,
+                   restaurantRegistration.getOwnerName(),
+                   restaurantRegistration.getRestaurantName(),
+                   "Restauron - Registration OTP (Resend)"
+           );
 
            otpRepository.save(otpAndUser);
        } catch (Exception e) {
            return false;
        }
-        return true;
-    }
-
-    @Override
-    public boolean resendOtpUsingAdminId(UserAll user, String email) {
-
-        try{
-            OtpAndUser otpAndUser = otpRepository.findByUserEmail(email);
-
-            if(otpAndUser == null) return false;
-
-            String otp = generateOtp();
-
-            otpAndUser.setOtp(otp);
-            otpAndUser.setOtpCreatedTime(LocalDateTime.now());
-            otpAndUser.setOtpExpirationTime(LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
-
-            System.out.println(otp);
-
-            String body = "Dear "+user.getName()+"\n\nThank you for choosing to register as an admin " + "with Restauron!\n\nYour OTP for admin registration is: " + otp + "\n\nPlease use this code to complete your registration process.\n\nBest regards,\nTeam Restauron";
-
-            emailService.sendEmail(user.getEmail(), body, "Admin Registration OTP resend");
-
-            otpRepository.save(otpAndUser);
-
-           } catch (Exception e) {
-        return false;
-    }
         return true;
     }
 
@@ -171,9 +135,8 @@ public class OtpServiceImp implements OtpService {
         otpAndUser.setOtpCreatedTime(LocalDateTime.now());
         otpAndUser.setOtpExpirationTime(expirationTime);
         otpRepository.save(otpAndUser);
-
-        String emailBody = "Your One-Time Password (OTP) for Restauron is: " + otp;
-        emailService.sendEmail(email, emailBody, "Restauron - Verify Your Email");
+        log.info("Saved OTP for email {} with expiration at {}", email, expirationTime);
+        emailService.sendOtpEmail(email, otp, "User", null, "Your OTP Code");
 
     }
 

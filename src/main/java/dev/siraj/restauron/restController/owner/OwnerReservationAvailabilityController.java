@@ -3,11 +3,14 @@ package dev.siraj.restauron.restController.owner;
 import dev.siraj.restauron.DTO.reservationAvailability.AvailabilitySettingRequestOwner;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
 import dev.siraj.restauron.entity.restaurant.management.reservation.DailyOverride;
+import dev.siraj.restauron.entity.restaurant.management.reservation.Slots;
 import dev.siraj.restauron.entity.restaurant.management.reservation.WeeklyAvailability;
+import dev.siraj.restauron.service.reservation.reservationAvailability.availabiliyCheckingService.AvailabilityCheckingService;
 import dev.siraj.restauron.service.reservation.reservationAvailability.dailyOverrideService.DailyOverrideService;
 import dev.siraj.restauron.service.reservation.reservationAvailability.weeklyAvailabilityService.WeeklyAvailabilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,11 +24,38 @@ import java.util.List;
 @RolesAllowed(roles = {"OWNER"})
 public class OwnerReservationAvailabilityController {
 
-
+    @Autowired
+    private AvailabilityCheckingService availabilityCheckingService;
     @Autowired
     private WeeklyAvailabilityService weeklyAvailabilityService;
     @Autowired
     private DailyOverrideService dailyOverrideService;
+
+    // ------------------------------------------- AVAILABILITY CHECKING --------------------------------------------------
+
+    /**
+     * Controller Method to fetch the slots available for a particular date
+     *
+     * @param encryptedRestaurantId Encrypted restaurant ID
+     * @param date Date that need to be checked for slot - "YYYY-MM-DD" format
+     *
+     * @return List of Slots with noOfSlots and noOfPeople that is max
+     */
+    @GetMapping("/getSlots")
+    public ResponseEntity<?> getAvailableSlotsForTheDay(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
+            @RequestParam String date
+    ){
+        log.info("Inside the controller to fetch available slots for a date {}", date);
+
+        List<Slots> slots = availabilityCheckingService.getSlotsForTheDate(date, encryptedRestaurantId);
+
+        if (slots.isEmpty()) return new ResponseEntity<>("No Slots available for this date", HttpStatus.NOT_FOUND);
+
+        return ResponseEntity.ok(slots);
+
+    }
+
 
     // ------------------------------------------- WEEKLY AVAILABILITY ----------------------------------------------------
 

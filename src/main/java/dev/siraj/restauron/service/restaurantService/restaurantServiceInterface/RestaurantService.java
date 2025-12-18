@@ -15,4 +15,5 @@ public interface RestaurantService {
     PublicViewRestaurantDto getPublicRestaurantDetailsUsingEncryptedId(String encryptedId);
 
 
+    String getOwnerContactInfo(String encryptedRestaurantId);
 }

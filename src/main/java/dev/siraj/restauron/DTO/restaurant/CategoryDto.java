@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class CategoryDto {
+    private String encryptedCategoryId;
     private String name;
     private String description;
     private List<MenuItemDto> menuItems;

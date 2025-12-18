@@ -1,0 +1,314 @@
+package dev.siraj.restauron.service.employee.employeeManagementService;
+
+import dev.siraj.restauron.DTO.common.PageRequestDto;
+import dev.siraj.restauron.DTO.owner.EmployeeRegistrationRequestDto;
+import dev.siraj.restauron.DTO.owner.EmployeeViewDto;
+import dev.siraj.restauron.DTO.owner.UpdateEmployeeRequestDto;
+import dev.siraj.restauron.entity.enums.AccountStatus;
+import dev.siraj.restauron.entity.enums.Roles;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
+import dev.siraj.restauron.entity.users.Employee;
+import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.mapping.employee.EmployeeMapping;
+import dev.siraj.restauron.respository.employeeRepo.EmployeeRepository;
+import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.service.cloudinaryService.ImageUploadService;
+import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
+import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+    // This is the implementation class for Employee Management Service
+
+@Service
+@Slf4j
+public class EmployeeManagementServiceImp implements EmployeeManagementService{
+
+    @Autowired private IdEncryptionService idEncryptionService;
+    @Autowired private RestaurantRepository restaurantRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private UserRepository userRepository;
+    @Autowired private EmployeeRepository employeeRepository;
+    @Autowired private EmailService emailService;
+    @Autowired private EmployeeMapping employeeMapping;
+    @Autowired private ImageUploadService imageUploadService;
+
+    /**
+     * Method to add a new employee to a restaurant
+     *
+     * @param dto Data transfer object containing employee registration details
+     * @param encryptedRestaurantId Encrypted ID of the restaurant to which the employee will be added
+     */
+    @Override
+    @Transactional
+    public void addEmployee(EmployeeRegistrationRequestDto dto, String encryptedRestaurantId) {
+
+        log.info("Starting the process of adding new employee '{}' encryptedRestaurantId '{}'", dto.getName(), encryptedRestaurantId);
+        // Decrypt restaurant encrypted id and find the restaurant
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+
+        log.info("Received the Long Id for fetching restaurant: {}", restaurantId);
+
+        Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() -> new EntityNotFoundException("Restaurant Not Found for ID: "+restaurantId));
+
+        log.info("Operating on restaurant: {}", restaurant.getName());
+
+        // Handle potential company email conflicts
+
+        String finalCompanyEmail = findUniqueCompanyEmail(dto.getCompanyEmail());
+
+
+        // Create and save the generic userAll record
+        UserAll user = new UserAll();
+        user.setName(dto.getName());
+        user.setEmail(finalCompanyEmail);
+        user.setRole(Roles.EMPLOYEE);
+        user.setPassword(passwordEncoder.encode(dto.getGeneratedPassword()));
+        user.setPhone(dto.getPhone());
+        user.setStatus(AccountStatus.ACTIVE);
+
+        UserAll savedUser = userRepository.save(user);
+        log.info("Successfully saved UserAll record fo {} with ID: {}", savedUser.getName(), savedUser.getId());
+
+        //Create and Save Employee-specific record
+        Employee employee = new Employee();
+        employee.setUser(savedUser);
+        employee.setAdhaarNo(dto.getAadhaarNo());
+        if(dto.getAadhaarNo() != null){
+            String adhaarPhotoUrl = imageUploadService.imageUploader(dto.getAadhaarImage(), "AadhaarPhoto-employee-"+restaurant.getId());
+            employee.setAdhaarPhoto(adhaarPhotoUrl);
+        }
+        employee.setPersonalEmail(dto.getPersonalEmail());
+
+        // By using addEmployee as a helper method add into both restaurant and employee class
+        restaurant.addEmployee(employee);
+
+        // as it is cascadeType All only have to save restaurant which persist to employee
+        restaurantRepository.save(restaurant);
+
+        log.info("Successfully saved and added employee to restaurant and vice versa for: {}", savedUser.getName());
+
+
+        // Send the credentials to email
+        emailService.sendEmployeeCredentialsToEmail(finalCompanyEmail, dto.getGeneratedPassword(), dto.getPersonalEmail(), restaurant.getName());
+
+    }
+
+    /**
+     * Method to fetch a paginated list of employees for a restaurant
+     *
+     * @param pageRequestDto Data transfer object containing pagination and filtering details
+     * @param encryptedRestaurantId Encrypted ID of the restaurant whose employees are to be fetched
+     * @return A paginated list of EmployeeViewDto objects
+     */
+    @Override
+    public Page<EmployeeViewDto> fetchEmployees(PageRequestDto pageRequestDto, String encryptedRestaurantId) {
+
+        log.info("Fetching employee list for restaurant, Filter: '{}', Search: '{}'", pageRequestDto.getFilter(), pageRequestDto.getSearch());
+
+        // Creating pageable object for pagination
+        Pageable pageable = PageRequest.of(pageRequestDto.getPageNo(), pageRequestDto.getSize());
+
+        //Building dynamic query using Specifications
+        Specification<Employee> specification = buildSpecification(encryptedRestaurantId, pageRequestDto);
+
+        //Executing the query
+        Page<Employee> employeePage = employeeRepository.findAll(specification, pageable);
+
+        log.info("Found {} employees on page {}", employeePage.getNumberOfElements(), pageRequestDto.getPageNo());
+
+        // Mapping entity Page to a Dto Page
+        return employeePage.map(employeeMapping::mapToEmployeeViewDto);
+
+    }
+
+
+    /**
+     * Method to get detailed information about a specific employee
+     *
+     * @param encryptedId Encrypted ID of the employee
+     * @return EmployeeViewDto containing detailed information about the employee
+     */
+    @Override
+    public EmployeeViewDto getEmployeeDetails(String encryptedId) {
+
+        Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        log.info("Decrypted employee ID: {}. Fetching employee...",employeeId);
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for employee ID: "+employeeId));
+
+        log.info("Employee found for ID {}. Mapping to DTO", employee.getUser().getName());
+
+        return employeeMapping.mapToEmployeeViewDto(employee);
+
+    }
+
+    /**
+     * Method to update details of an existing employee
+     *
+     * @param encryptedId Encrypted ID of the employee to be updated
+     * @param updateDto Data transfer object containing updated employee details
+     */
+    @Override
+    @Transactional
+    public void updateEmployeeDetails(String encryptedId, UpdateEmployeeRequestDto updateDto) {
+
+        Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        log.info("Attempting to update employee with employee ID: {}",employeeId);
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for employee ID: "+employeeId));
+
+        UserAll user = employee.getUser();
+
+        log.info("Updating details for user: {}",user.getName());
+
+        user.setName(updateDto.getName());
+        user.setPhone(updateDto.getPhone());
+
+        employee.setPersonalEmail(updateDto.getPersonalEmail());
+
+        employee.setAdhaarNo(updateDto.getAdhaarNo());
+        if(updateDto.getAdhaarPhoto() != null){
+            if(!employee.getAdhaarPhoto().isEmpty()) imageUploadService.deleteImageByUrl(employee.getAdhaarPhoto());
+
+
+            String adhaarImageUrl = imageUploadService.imageUploader(updateDto.getAdhaarPhoto(),"AadhaarPhoto-employee-"+employee.getRestaurant().getId() );
+            employee.setAdhaarPhoto(adhaarImageUrl);
+        }
+
+        employeeRepository.save(employee);
+
+        log.info("Successfully updated employee details for {}", user.getName());
+
+    }
+
+    /**
+     * Method to delete an employee from a restaurant
+     *
+     * @param encryptedId Encrypted ID of the employee to be deleted
+     * @param restaurantEncryptedId Encrypted ID of the restaurant from which the employee is to be deleted
+     */
+    @Transactional
+    @Override
+    public void deleteEmployee(String encryptedId, String restaurantEncryptedId) {
+
+        Long employeeId = idEncryptionService.decryptToLongId(encryptedId);
+
+        Long restaurantId = idEncryptionService.decryptToLongId(restaurantEncryptedId);
+
+        log.warn("Attempting to delete employee with ID: {}", employeeId);
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EntityNotFoundException("Employee not found for the ID : "+ employeeId));
+
+        Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() -> new EntityNotFoundException("Restaurant is not found"));
+
+        restaurant.removeEmployee(employee);
+
+        restaurantRepository.save(restaurant);
+
+        log.info("Successfully deleted employee and associated user record for employee ID: {} ", employeeId);
+
+    }
+
+    /**
+     * Helper method to build dynamic JPA Specification based on filtering and searching criteria
+     *
+     * @param encryptedRestaurantId Encrypted ID of the restaurant
+     * @param pageRequestDto Data transfer object containing filtering and searching details
+     * @return Specification<Employee> for querying employees
+     */
+    private Specification<Employee> buildSpecification(String encryptedRestaurantId, PageRequestDto pageRequestDto) {
+
+        //Decrypting restaurant ID
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+
+        return (root, query, criteriaBuilder) -> {
+            // Root predicate - always filter by the owner's restaurant
+            Predicate finalPredicate = criteriaBuilder.equal(root.get("restaurant").get("id"), restaurantId);
+
+            // Adding status filter if provided and not "ALL"
+            if(StringUtils.hasText(pageRequestDto.getFilter())){
+                try{
+                    AccountStatus status =
+                            AccountStatus.valueOf(pageRequestDto.getFilter().toUpperCase());
+
+                    Join<Employee, UserAll> userJoin = root.join("user");
+                    // Join with userAll to access status
+                    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(userJoin.get("status"),status));
+
+                }catch (IllegalArgumentException e){
+                    log.warn("Invalid status filter provided: {}", pageRequestDto.getFilter());
+
+                }
+            }
+
+            // adding searching filter if provided
+            if(StringUtils.hasText(pageRequestDto.getSearch())){
+                Join<Employee, UserAll> userJoin = root.join("user");
+
+
+                String searchPattern = "%"+pageRequestDto.getSearch().toLowerCase()+"%";
+
+                Predicate searchPredicate = criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("name")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("email")),searchPattern)
+                );
+
+                finalPredicate = criteriaBuilder.and(finalPredicate, searchPredicate);
+            }
+
+            return finalPredicate;
+        };
+    }
+
+    /**
+     * Helper method to find a unique company email by appending random numbers if necessary
+     *
+     * @param companyEmail The base company email to check
+     * @return A unique company email
+     */
+    private String findUniqueCompanyEmail(String companyEmail) {
+
+        log.info("Checking whether the given email {} exists or not", companyEmail);
+
+        if (!userRepository.existsByEmail(companyEmail)) {
+            log.info("Base email is unique. Using: {}", companyEmail);
+            return companyEmail;
+        }
+
+        // if email exist append 1-2 random numbers
+        int attempt = 0;
+
+        while(attempt < 100){ // Safety break to prevent an infinite loop
+
+            int randomNumber = ThreadLocalRandom.current().nextInt(1, 100);
+            String[] parts = companyEmail.split("@");
+            String newEmail = parts[0] + randomNumber + "@" + parts[1];
+
+            if (!userRepository.existsByEmail(newEmail)) {
+                log.info("Found unique email after conflict: {}", newEmail);
+                return newEmail;
+            }
+            attempt++;
+        }
+        log.error("Could not generate a unique email for base: {}", companyEmail);
+        throw new IllegalStateException("Unable to generate a unique email for the employee.");
+
+    }
+}

@@ -80,5 +80,14 @@ public class RestaurantServiceImp implements RestaurantService {
 
     }
 
+    @Override
+    public String getOwnerContactInfo(String encryptedRestaurantId) {
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with ID: " + restaurantId));
+
+        return restaurant.getPhone();
+    }
+
 
 }

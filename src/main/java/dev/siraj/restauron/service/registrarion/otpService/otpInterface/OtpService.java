@@ -8,15 +8,11 @@ public interface OtpService {
 
     String sendOtpForRestaurantRegistration(String name, String email, String restaurant, Long id);
 
-    String sendOtpForAdminRegistration(String name, String email,Long id);
-
     boolean verifyOtpUsingEmail(OtpDto otpDto, String userId);
 
     void resendOtpUsingEmail(String email);
 
     boolean resendOtpUsingRestaurantRegistrationId(RestaurantRegistration userId);
-
-    boolean resendOtpUsingAdminId(UserAll user, String email);
 
     void generateAndSendOtp(String email);
 

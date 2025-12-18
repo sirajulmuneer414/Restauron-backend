@@ -27,6 +27,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Arrays;
 import java.util.List;
 
+    // general web security and filter chain configuration class
+
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
@@ -43,7 +45,9 @@ public class SecurityConfig {
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests((request) -> request.requestMatchers("/registration/*","/registration/*/**","/auth/*","/public/**").permitAll()
+                .authorizeHttpRequests((request) -> request.requestMatchers("/registration/*","/registration/*/**","/auth/*","/public/**","/ws-restauron/**", "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
 
                 )

@@ -22,5 +22,5 @@ public interface OwnerCustomerService {
 
     void rejectUnblockRequest(String requestEncryptedId, String ownerResponse);
 
-    CustomerSearchResultDto findCustomerForOwner(String phone, String email);
+    CustomerSearchResultDto findCustomerForOwner(String encryptedRestaurantId, String phone, String email);
 }

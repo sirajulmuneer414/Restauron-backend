@@ -4,6 +4,8 @@ import dev.siraj.restauron.entity.restaurant.Restaurant;
 import jakarta.persistence.*;
 import lombok.Data;
 
+    // Employee entity representing an employee in the system
+
 @Entity
 @Data
 public class Employee {

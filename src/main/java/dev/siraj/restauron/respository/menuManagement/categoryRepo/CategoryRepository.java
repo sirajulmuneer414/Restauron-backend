@@ -17,4 +17,6 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     Page<Category> findByRestaurantId(Long restaurantId, Pageable pageable);
 
     List<Category> findByRestaurantIdAndStatus(Long restaurantId, AvailabilityStatus status);
+
+    List<Category> findByRestaurantId(Long restaurantId);
 }

@@ -4,13 +4,17 @@ package dev.siraj.restauron.service.authentication;
 import dev.siraj.restauron.DTO.authentication.EmailPasswordDto;
 import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
 import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
+import dev.siraj.restauron.entity.authentication.PasswordResetToken;
 import dev.siraj.restauron.entity.authentication.RefreshToken;
 import dev.siraj.restauron.entity.enums.Roles;
 import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.respository.authentication.PasswordResetTokenRepository;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
 import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
+import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +22,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -39,6 +46,15 @@ public class AuthenticationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository tokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
 
     public JwtAuthResponse createResponseToken(EmailPasswordDto emailPasswordDto){
@@ -89,4 +105,58 @@ public class AuthenticationService {
             refreshTokenService.deleteByUser(user);
         }
     }
+
+
+    @Transactional
+    public void initiatePasswordReset(String email) {
+        UserAll user = userRepository.findByEmail(email);
+
+                if(user == null) {
+                    throw new EntityNotFoundException("User not found with email: " + email);
+                }
+        // Generate UUID Token
+        String token = UUID.randomUUID().toString();
+
+        // Save Token (Delete old ones first to keep DB clean)
+        tokenRepository.deleteByEmail(email);
+        PasswordResetToken resetToken = new PasswordResetToken(email, token);
+        tokenRepository.save(resetToken);
+
+        // Send Email (Mock implementation for dev)
+
+
+        String link = "http://localhost:5173/reset-password?token=" + token;
+        System.out.println("RESET LINK: " + link); // FOR DEV ONLY
+
+        emailService.sendPasswordResetEmail(user.getEmail(), link, user.getName());
+
+
+        // emailService.sendSimpleMessage(email, "Password Reset", "Click here: " + link);
+    }
+
+    // Password Encoder Bean
+    @Transactional
+    public void completePasswordReset(String token, String newPassword) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+
+        if (resetToken.isExpired()) {
+            tokenRepository.delete(resetToken);
+            throw new RuntimeException("Token expired");
+        }
+
+        // Update User Password
+        UserAll user = userRepository.findByEmail(resetToken.getEmail());
+
+        if(user == null) {
+            throw new EntityNotFoundException("User not found with email: " + resetToken.getEmail());
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Delete used token
+        tokenRepository.delete(resetToken);
+    }
+
 }

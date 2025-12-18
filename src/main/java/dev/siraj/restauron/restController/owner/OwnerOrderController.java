@@ -4,11 +4,9 @@ package dev.siraj.restauron.restController.owner;
 import dev.siraj.restauron.DTO.orders.OrderPageRequestDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderSummaryDto;
-import dev.siraj.restauron.DTO.owner.orderManagement.OwnerOrderRequest;
-import dev.siraj.restauron.DTO.owner.orderManagement.UpdateOrderStatusRequest;
+import dev.siraj.restauron.DTO.common.orderManagement.OrderRequest;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
 import dev.siraj.restauron.service.orderManagement.interfaces.OrderService;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerCustomerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,7 +54,7 @@ public class OwnerOrderController {
     @PostMapping("/create")
     public ResponseEntity<OrderDetailDto> createManualOrder(
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
-            @RequestBody OwnerOrderRequest request) {
+            @RequestBody OrderRequest request) {
 
         log.info("Inside the controller to create order from owner side");
         System.out.println(request.getTableId());
@@ -77,12 +75,13 @@ public class OwnerOrderController {
     // PUT /owner/orders/{orderId}/status
     @PutMapping("/status/{orderId}")
     public ResponseEntity<OrderDetailDto > updateOrderStatus(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @PathVariable String orderId,
             @RequestParam("status") String orderStatus) {
 
         log.info("Inside the method to update order status for owner module");
 
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId,orderStatus));
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId,orderStatus, encryptedRestaurantId));
     }
 
     // DELETE /api/owner/orders/{orderId}

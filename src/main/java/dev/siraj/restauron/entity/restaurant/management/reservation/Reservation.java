@@ -1,42 +1,50 @@
 package dev.siraj.restauron.entity.restaurant.management.reservation;
 
 import dev.siraj.restauron.entity.enums.ReservationStatus;
-import dev.siraj.restauron.entity.restaurant.Restaurant;
-import dev.siraj.restauron.entity.users.Customer;
 import jakarta.persistence.*;
+import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "reservations")
+@Data
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(nullable = true)
-    private Customer customer;
+    @Column(nullable = false)
+    private String restaurantEncryptedId;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private Restaurant restaurant;
+    private String customerEncryptedId; // Nullable
 
-    private String name;
-    private String email;
-    private String phone;
+    private String customerName;        // Nullable
 
-    @Column(name = "reservation_date")
-    private LocalDate reservationTime;
+    private String customerEmail;       // Nullable
 
-    @Column(name = "reservation_time")
-    private String time;
+    @Column(nullable = false)
+    private String customerPhone;       // Not null
+
+    @Column(nullable = false)
+    private String reservationDate;    // YYYY-MM-DD
+
+    @Column(nullable = false)
+    private String reservationTime;     // "HH:mm"
+
+    @Column(nullable = false)
+    private Integer noOfPeople;
 
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status; // e.g. "PENDING", "CONFIRMED", "CANCELLED"
+    private ReservationStatus currentStatus;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "reservation_status_timestamp", joinColumns = @JoinColumn(name = "reservation_id"))
+    private List<ReservationStatusTimestamp> timestamps = new ArrayList<>();
 
     private String remark;
 
-    private Integer numberOfQuests;
+    private String reservationDoneBy;
 }

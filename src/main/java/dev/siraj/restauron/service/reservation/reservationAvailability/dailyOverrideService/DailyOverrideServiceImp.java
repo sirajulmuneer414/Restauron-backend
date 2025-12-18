@@ -2,7 +2,7 @@ package dev.siraj.restauron.service.reservation.reservationAvailability.dailyOve
 
 import dev.siraj.restauron.DTO.reservationAvailability.AvailabilitySettingRequestOwner;
 import dev.siraj.restauron.entity.restaurant.management.reservation.DailyOverride;
-import dev.siraj.restauron.respository.reservationAvailability.dailyOverrideRepo.DailyOverrideRepository;
+import dev.siraj.restauron.respository.reservation.reservationAvailability.dailyOverrideRepo.DailyOverrideRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

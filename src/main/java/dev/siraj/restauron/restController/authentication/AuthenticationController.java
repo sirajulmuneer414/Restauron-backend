@@ -3,6 +3,7 @@ package dev.siraj.restauron.restController.authentication;
 import dev.siraj.restauron.DTO.authentication.EmailPasswordDto;
 import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
 import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
+import dev.siraj.restauron.DTO.authentication.ResetPasswordRequestDTO;
 import dev.siraj.restauron.service.authentication.AuthenticationService;
 import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
@@ -85,5 +86,19 @@ public class AuthenticationController {
             return ResponseEntity.ok("Logged out"); // Still return success
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        authenticationService.initiatePasswordReset(email);
+        return ResponseEntity.ok("Reset link sent to your email.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+
+        authenticationService.completePasswordReset(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok("Password updated successfully.");
+    }
+
 
 }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Subscription Expiring Soon</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f7; margin: 0; padding: 0; width: 100% !important; }
+        .container { display: block; margin: 0 auto !important; max-width: 600px; width: 600px; }
+        .content { margin: 0 auto; max-width: 600px; padding: 10px; }
+        .main { background: #ffffff; border-radius: 8px; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .wrapper { padding: 30px; }
+        
+        /* Dynamic Warning Colors */
+        h1 { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #d69e2e; /* Warning Yellow/Orange */ }
+        
+        p { font-size: 16px; color: #333333; line-height: 1.6; margin-bottom: 15px; }
+        .highlight-box { background-color: #fffaf0; border-left: 4px solid #d69e2e; padding: 15px; margin: 20px 0; color: #555; }
+        
+        .btn table td a { background-color: #2b6cb0; border: solid 1px #2b6cb0; border-radius: 5px; color: #ffffff; display: inline-block; font-weight: bold; padding: 12px 25px; text-decoration: none; }
+        
+        .footer { margin-top: 10px; text-align: center; width: 100%; }
+        .footer p { color: #999999; font-size: 12px; }
+    </style>
+</head>
+<body>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
+    <tr>
+        <td>&nbsp;</td>
+        <td class="container">
+            <div class="content">
+                <!-- HEADER -->
+                <div style="text-align: center; padding: 20px 0;">
+                    <span style="font-size: 20px; font-weight: bold; color: #333;">Restauron</span>
+                </div>
+
+                <!-- MAIN CARD -->
+                <table role="presentation" class="main">
+                    <tr>
+                        <td class="wrapper">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td>
+                                        <p>Hi <span th:text="${restaurantName}">Partner</span>,</p>
+
+                                        <!-- Dynamic Header based on days -->
+                                        <h1 th:text="'Your Subscription Expires in ' + ${daysLeft} + ' Days'">Subscription Expiring Soon</h1>
+
+                                        <p>We wanted to remind you that your <strong>Restauron</strong> premium plan is set to expire on <strong th:text="${expiryDate}">[Date]</strong>.</p>
+
+                                        <div class="highlight-box">
+                                            To avoid any service interruption during your busy hours, we recommend renewing your plan today.
+                                        </div>
+
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn">
+                                            <tbody>
+                                            <tr>
+                                                <td align="center">
+                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td> <a th:href="${renewalLink}" target="_blank">Extend My Subscription</a> </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <p style="font-size: 14px; color: #777; margin-top: 20px;">Need help with your plan? Reply to this email to contact support.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- FOOTER -->
+                <div class="footer">
+                    <p>Restauron Inc, Kinfra Techno Park, Calicut</p>
+                </div>
+            </div>
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+</body>
+</html>

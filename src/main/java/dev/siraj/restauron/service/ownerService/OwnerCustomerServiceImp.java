@@ -11,11 +11,13 @@ import dev.siraj.restauron.entity.blockAndUnblock.CustomerBlock;
 import dev.siraj.restauron.entity.blockAndUnblock.CustomerUnblockRequest;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.RequestStatus;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Customer;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.blockAndUnblockRepo.CustomerBlockRepository;
 import dev.siraj.restauron.respository.blockAndUnblockRepo.CustomerUnblockRequestRepository;
 import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
+import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.ownerService.interfaces.OwnerCustomerService;
@@ -47,6 +49,7 @@ public class OwnerCustomerServiceImp implements OwnerCustomerService {
     @Autowired private CustomerBlockRepository customerBlockRepository;
     @Autowired private CustomerUnblockRequestRepository customerUnblockRequestRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private RestaurantRepository restaurantRepository;
 
     @Override
     public Page<CustomerResponseDto> findCustomersByRestaurant(String restaurantEncryptedId, PageRequestDto filter) {
@@ -206,9 +209,14 @@ public class OwnerCustomerServiceImp implements OwnerCustomerService {
     }
 
     @Override
-    public CustomerSearchResultDto findCustomerForOwner(String phone, String email) {
+    public CustomerSearchResultDto findCustomerForOwner(String encryptedRestaurantId, String phone, String email) {
+
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+
+        Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() -> new EntityNotFoundException("Restaurant for given ID "+restaurantId+" NOT FOUND"));
+
         if (StringUtils.hasText(phone)) {
-            Customer customer = customerRepository.findByUser_Phone(phone).orElse(null);
+            Customer customer = customerRepository.findByUser_PhoneAndRestaurant(phone, restaurant).orElse(null);
 
             if(customer != null){
                 return convertToSearchResultDto(customer);
@@ -216,7 +224,7 @@ public class OwnerCustomerServiceImp implements OwnerCustomerService {
 
         }
         if (StringUtils.hasText(email)) {
-            Customer customer = customerRepository.findByUser_Email(email).orElse(null);
+            Customer customer = customerRepository.findByUser_EmailAndRestaurant(email, restaurant).orElse(null);
 
             if(customer != null){
                 return convertToSearchResultDto(customer);

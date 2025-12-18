@@ -5,7 +5,7 @@ import dev.siraj.restauron.DTO.owner.EmployeeRegistrationRequestDto;
 import dev.siraj.restauron.DTO.owner.EmployeeViewDto;
 import dev.siraj.restauron.DTO.owner.UpdateEmployeeRequestDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.service.employeeManagementService.EmployeeManagementService;
+import dev.siraj.restauron.service.employee.employeeManagementService.EmployeeManagementService;
 import dev.siraj.restauron.service.restaurantService.restaurantServiceInterface.RestaurantService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +33,13 @@ public class OwnerEmployeeController {
     private EmployeeManagementService employeeManagementService;
 
 
+    /**
+     * * Endpoint to fetch a paginated list of employees based on provided filters.
+     *
+     * @param pageRequestDto       The pagination and filter details.
+     * @param encryptedRestaurantId The encrypted ID of the restaurant from the request header.
+     * @return A ResponseEntity containing a Page of EmployeeViewDto or an error status.
+     */
     @PostMapping("/fetch-list")
     public ResponseEntity<Page<EmployeeViewDto>> fetchEmployeeListUsingFilter(@RequestBody PageRequestDto pageRequestDto, @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId){
 
@@ -52,6 +59,19 @@ public class OwnerEmployeeController {
 
     }
 
+    /**
+     * * Endpoint to add a new employee to the restaurant.
+     *
+     * @param name               The name of the employee.
+     * @param personalEmail     The personal email of the employee.
+     * @param phone              The phone number of the employee.
+     * @param aadhaarNo         The Aadhaar number of the employee.
+     * @param aadhaarImage      The Aadhaar image file of the employee.
+     * @param companyEmail      The company email for the employee.
+     * @param generatedPassword The generated password for the employee.
+     * @param encryptedRestaurantId The encrypted ID of the restaurant from the request header.
+     * @return A ResponseEntity indicating success or failure of the operation.
+     */
     @PostMapping("/add")
     public ResponseEntity<String> addEmployee(@RequestParam("name") String name,
     @RequestParam("personalEmail") String personalEmail,
@@ -84,6 +104,12 @@ public class OwnerEmployeeController {
         }
     }
 
+    /**
+     * * Endpoint to fetch detailed information about a specific employee.
+     *
+     * @param encryptedId The encrypted ID of the employee.
+     * @return A ResponseEntity containing EmployeeViewDto or an error status.
+     */
     @GetMapping("/detail/{encryptedId}")
     public ResponseEntity<?> getEmployeeDetails(@PathVariable String encryptedId) {
 
@@ -104,6 +130,13 @@ public class OwnerEmployeeController {
     }
 
 
+    /**
+     * * Endpoint to update the details of an existing employee.
+     *
+     * @param encryptedId The encrypted ID of the employee.
+     * @param updateDto   The DTO containing updated employee details.
+     * @return A ResponseEntity indicating success or failure of the operation.
+     */
     @PutMapping("/update/{encryptedId}")
     public ResponseEntity<String> updateEmployeeDetails(
             @PathVariable String encryptedId,
@@ -126,6 +159,13 @@ public class OwnerEmployeeController {
     }
 
 
+    /**
+     * * Endpoint to delete an employee from the restaurant.
+     *
+     * @param encryptedId            The encrypted ID of the employee.
+     * @param restaurantEncryptedId  The encrypted ID of the restaurant from the request header.
+     * @return A ResponseEntity indicating success or failure of the operation.
+     */
     @DeleteMapping("/delete/{encryptedId}")
     public ResponseEntity<String> deleteEmployee(
             @PathVariable String encryptedId,

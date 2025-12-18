@@ -83,12 +83,16 @@ public class OwnerCustomerController {
     }
 
 
+    /**
+     * Method to check whether a customer exists in
+     */
     @GetMapping("/check")
     public ResponseEntity<CustomerSearchResultDto> checkCustomerExists(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String email) {
 
-        CustomerSearchResultDto customerDto = customerService.findCustomerForOwner(phone, email);
+        CustomerSearchResultDto customerDto = customerService.findCustomerForOwner(encryptedRestaurantId, phone, email);
 
         if(customerDto == null){
             return ResponseEntity.noContent().build();

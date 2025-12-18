@@ -2,7 +2,7 @@ package dev.siraj.restauron.service.reservation.reservationAvailability.weeklyAv
 
 import dev.siraj.restauron.DTO.reservationAvailability.AvailabilitySettingRequestOwner;
 import dev.siraj.restauron.entity.restaurant.management.reservation.WeeklyAvailability;
-import dev.siraj.restauron.respository.reservationAvailability.weeklyAvailabiliyRepo.WeeklyAvailabilityRepository;
+import dev.siraj.restauron.respository.reservation.reservationAvailability.weeklyAvailabiliyRepo.WeeklyAvailabilityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;

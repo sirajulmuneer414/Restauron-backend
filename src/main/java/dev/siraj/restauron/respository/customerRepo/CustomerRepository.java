@@ -1,5 +1,6 @@
 package dev.siraj.restauron.respository.customerRepo;
 
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Customer;
 import dev.siraj.restauron.entity.users.UserAll;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,10 @@ public interface CustomerRepository extends JpaRepository<Customer,Long>, JpaSpe
     Optional<Customer> findByUser_Phone(String customerPhone);
 
     Optional<Customer> findByUser_Email(String email);
+
+    Optional<Customer> findByUser_PhoneAndRestaurant(String phone, Restaurant restaurant);
+
+    Optional<Customer> findByUser_EmailAndRestaurant(String email, Restaurant restaurant);
+
+    long countByRestaurantId(Long id);
 }

@@ -28,4 +28,5 @@ public class WeeklyAvailability {
 
     private String createdBy = "OWNER";
 
+
 }

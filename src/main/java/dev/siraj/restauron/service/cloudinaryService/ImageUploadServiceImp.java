@@ -20,6 +20,8 @@ public class ImageUploadServiceImp implements ImageUploadService{
         try {
             Map<Object, Object> options = new HashMap<>();
             options.put("folder", folder);
+            options.put("quality", "auto:best");
+            options.put("fetch_format", "auto");
             Map uploadedFile = cloudinary.uploader().upload(file.getBytes(), options);
             String publicId = (String) uploadedFile.get("public_id");
             return cloudinary.url().secure(true).generate(publicId);

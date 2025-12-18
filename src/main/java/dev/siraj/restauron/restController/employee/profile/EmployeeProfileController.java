@@ -5,7 +5,7 @@ import dev.siraj.restauron.DTO.employee.PasswordChangeRequestDto;
 import dev.siraj.restauron.DTO.owner.EmployeeViewDto;
 import dev.siraj.restauron.DTO.owner.UpdateEmployeeRequestDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.service.employeeService.EmployeeService;
+import dev.siraj.restauron.service.employee.employeeService.EmployeeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

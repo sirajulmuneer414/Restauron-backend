@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Email;
 
 import java.util.UUID;
 
+    // UserAll entity representing all users in the system
+
 @Entity
 public class UserAll {
 

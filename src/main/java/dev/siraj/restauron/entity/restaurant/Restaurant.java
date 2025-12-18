@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,8 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @ToString.Exclude // IMPORTANT: Prevents infinite loops in toString()
     private List<Employee> employees = new ArrayList<>();
+
+    private LocalDate createdAt = LocalDate.now();
 
 
     // --- Helper methods for bidirectional relationship ---
