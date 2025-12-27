@@ -5,6 +5,7 @@ import dev.siraj.restauron.DTO.restaurant.restaurantTable.RestaurantTableDTO;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,7 +22,7 @@ public class OrderSummaryDto {
 
     private String totalAmount;
 
-    private LocalDate orderDate;
+    private LocalDateTime orderDate;
 
     private RestaurantTableDTO restaurantTable;
 

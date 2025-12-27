@@ -17,16 +17,16 @@ import java.util.Base64;
 @Service
 public class IdEncryptionServiceImp implements IdEncryptionService{
 
-    private static final String ALGORITHM = "AES";
+    private final String algorithm;
     private final SecretKeySpec secretKey;
 
-    public IdEncryptionServiceImp(@Value("${app.encryption.key}") String secret) throws IllegalAccessException {
-        System.out.println(secret);
-        System.out.println(secret.length());
+    public IdEncryptionServiceImp(@Value("${app.encryption.key}") String secret, @Value("${app.encryption.algorithm}") String algo) throws IllegalAccessException {
+
         if(secret == null || secret.length() != 32){
             throw new IllegalAccessException("Encryption key must be 32 characters long.");
         }
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), algo);
+        this.algorithm = algo;
     }
 
     // Method for encrypting Long id
@@ -36,7 +36,7 @@ public class IdEncryptionServiceImp implements IdEncryptionService{
         if(id == null) return null;
 
         try{
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            Cipher cipher = Cipher.getInstance(algorithm);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
             byte[] encryptedBytes = cipher.doFinal(String.valueOf(id).getBytes(StandardCharsets.UTF_8));
@@ -65,7 +65,7 @@ public class IdEncryptionServiceImp implements IdEncryptionService{
         }
 
         try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            Cipher cipher = Cipher.getInstance(algorithm);
 
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
 

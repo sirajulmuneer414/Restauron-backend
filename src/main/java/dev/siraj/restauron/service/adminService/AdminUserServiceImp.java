@@ -32,7 +32,7 @@ public class AdminUserServiceImp implements AdminUserService {
     public void updateUser(String encryptedId, UserEditRequestDto dto) {
         Long id = idEncryptionService.decryptToLongId(encryptedId);
         UserAll user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("User not found for updating user with ID: " + id));
 
         user.setName(dto.getName());
         user.setPhone(dto.getPhone());
@@ -45,7 +45,7 @@ public class AdminUserServiceImp implements AdminUserService {
     public void blockUser(String encryptedId) {
         Long id = idEncryptionService.decryptToLongId(encryptedId);
         UserAll user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("User not found for blocking user with ID: " + id));
 
         user.setStatus(AccountStatus.NONACTIVE);
         userRepository.save(user);
@@ -56,7 +56,7 @@ public class AdminUserServiceImp implements AdminUserService {
     public void unblockUser(String encryptedId) {
         Long id = idEncryptionService.decryptToLongId(encryptedId);
         UserAll user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("User not found for unblocking user with ID: " + id));
 
         user.setStatus(AccountStatus.ACTIVE);
         userRepository.save(user);
@@ -67,7 +67,7 @@ public class AdminUserServiceImp implements AdminUserService {
     public void deleteUser(String encryptedId) {
         Long id = idEncryptionService.decryptToLongId(encryptedId);
 
-        UserAll user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found with ID: "+id));
+        UserAll user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found for deleting user with ID: "+id));
 
         switch (user.getRole()){
 

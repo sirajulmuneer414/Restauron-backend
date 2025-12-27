@@ -16,7 +16,7 @@ public class EmployeeGeneralController {
     @Autowired private EmployeeService employeeService;
 
     @GetMapping("/get-restaurant-details/{employeeUserId}")
-    public ResponseEntity<?> getRestaurantDetailsForEmployeeLogin(@PathVariable String employeeUserId){
+    public ResponseEntity<RestaurantReduxSettingDto> getRestaurantDetailsForEmployeeLogin(@PathVariable String employeeUserId){
         log.info("Inside the get restaurant details after login for employees {}",employeeUserId);
 
         try {
@@ -31,8 +31,7 @@ public class EmployeeGeneralController {
         }
 
 
-
-        return new ResponseEntity<>("Restaurant not found", HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
 
     }
 }

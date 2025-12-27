@@ -4,7 +4,6 @@ package dev.siraj.restauron.DTO.websocket.notification;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
     // DTO for sending order alerts via WebSocket notifications
 

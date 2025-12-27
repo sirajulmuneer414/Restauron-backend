@@ -32,9 +32,9 @@ public class AdminStatsController {
      * @return ResponseEntity with total restaurants count
      */
     @GetMapping("/total-restaurants")
-    public ResponseEntity<?> getTotalRestaurants() {
+    public ResponseEntity<Map<String, Long>> getTotalRestaurants() {
         long count = adminStatsService.countRestaurants();
-        return ResponseEntity.ok(Map.of("total", count));
+        return ResponseEntity.ok(Map.of("totalRestaurants", count));
     }
 
     /**
@@ -42,9 +42,9 @@ public class AdminStatsController {
      * @return ResponseEntity with total customers count
      */
     @GetMapping("/total-customers")
-    public ResponseEntity<?> getTotalCustomers() {
+    public ResponseEntity<Map<String, Long>> getTotalCustomers() {
         long count = adminStatsService.countCustomers();
-        return ResponseEntity.ok(Map.of("total", count));
+        return ResponseEntity.ok(Map.of("totalCustomers", count));
     }
 
     /**
@@ -52,9 +52,9 @@ public class AdminStatsController {
      * @return ResponseEntity with total active reservations count
      */
     @GetMapping("/active-reservations")
-    public ResponseEntity<?> getActiveReservations() {
+    public ResponseEntity<Map<String,Long>> getActiveReservations() {
         long count = adminStatsService.countActiveReservations();
-        return ResponseEntity.ok(Map.of("total", count));
+        return ResponseEntity.ok(Map.of("totalReservations", count));
     }
 
     /**
@@ -62,7 +62,7 @@ public class AdminStatsController {
      * @return ResponseEntity with list of RestaurantSummaryDTO
      */
     @GetMapping("/restaurants/list")
-    public ResponseEntity<?> getRestaurantsListOfLastFive() {
+    public ResponseEntity<List<RestaurantSummaryDTO>> getRestaurantsListOfLastFive() {
         List<RestaurantSummaryDTO> restaurantList = adminStatsService.getRestaurantTableData();
         return ResponseEntity.ok(restaurantList);
     }

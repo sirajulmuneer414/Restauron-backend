@@ -39,11 +39,6 @@ public class AdminRestaurantController {
 
     @PutMapping("/update/{encryptedId}")
     public ResponseEntity<Void> updateRestaurant(@PathVariable String encryptedId, @RequestBody RestaurantUpdateDto dto) {
-        System.out.println(dto.getEmail());
-        System.out.println(dto.getName());
-        System.out.println(dto.getAddress());
-        System.out.println(dto.getPincode());
-        System.out.println(dto.getDistrict());
         log.info("Inside controller to update restaurant");
         adminRestaurantService.updateRestaurant(encryptedId, dto);
         log.info("Successfully updated restaurant");

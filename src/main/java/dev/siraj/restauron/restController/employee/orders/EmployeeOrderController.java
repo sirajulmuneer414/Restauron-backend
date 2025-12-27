@@ -35,14 +35,11 @@ public class EmployeeOrderController {
      * @return ResponseEntity containing the created order details.
      */
     @PostMapping()
-    public ResponseEntity<?> createOrder(
+    public ResponseEntity<OrderDetailDto> createOrder(
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @RequestBody OrderRequest request) {
         log.info("Inside the controller to create order from employee side");
-        System.out.println(request.getTableId());
-        for(var item : request.getItems()){
-            System.out.println(item);
-        }
+
         return ResponseEntity.ok(orderService.createManualOrder(encryptedRestaurantId, request));
     }
 

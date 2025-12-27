@@ -4,7 +4,6 @@ package dev.siraj.restauron.service.registrarion.otpService;
 import dev.siraj.restauron.DTO.registration.OtpDto;
 import dev.siraj.restauron.entity.otpRegistration.OtpAndUser;
 import dev.siraj.restauron.entity.restaurant.RestaurantRegistration;
-import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.otpRepository.OtpAndUserRepository;
 import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
 import dev.siraj.restauron.service.registrarion.otpService.otpInterface.OtpService;
@@ -21,12 +20,16 @@ import java.util.Random;
 @Slf4j
 public class OtpServiceImp implements OtpService {
 
-    @Autowired
-    private EmailService emailService;
 
+    private final EmailService emailService;
+    private final Random randomGenerator = new SecureRandom();
+    private final OtpAndUserRepository otpRepository;
 
     @Autowired
-    private OtpAndUserRepository otpRepository;
+    public OtpServiceImp(EmailService emailService, OtpAndUserRepository otpRepository) {
+        this.emailService = emailService;
+        this.otpRepository = otpRepository;
+    }
 
     private static final int OTP_LENGTH = 6;
     private static final int EXPIRATION_MINUTES = 5;
@@ -47,7 +50,7 @@ public class OtpServiceImp implements OtpService {
 
 
             String otp = generateOtp();
-        System.out.println(otp);
+        log.info(otp);
             emailService.sendOtpEmail(
                     email,
                     otp,
@@ -75,7 +78,7 @@ public class OtpServiceImp implements OtpService {
 
         OtpAndUser otpAndUser = otpRepository.findByUserEmail(userEmail);
 
-        System.out.println(otpAndUser.getOtp());
+        log.info(otpAndUser.getOtp());
         if(otpDto.getReceivedTime().isBefore(otpAndUser.getOtpExpirationTime())){
             return Objects.equals(otpDto.getOtp(), otpAndUser.getOtp());
 
@@ -84,12 +87,6 @@ public class OtpServiceImp implements OtpService {
         return false;
     }
 
-    @Override
-    public void resendOtpUsingEmail(String email) {
-
-
-
-    }
 
     @Override
     public boolean resendOtpUsingRestaurantRegistrationId(RestaurantRegistration restaurantRegistration) {
@@ -99,7 +96,7 @@ public class OtpServiceImp implements OtpService {
            if(otpAndUser == null)return false;
 
            String otp = generateOtp();
-           System.out.println(otp);
+           log.info(otp);
 
            otpAndUser.setOtp(otp);
            otpAndUser.setOtpCreatedTime(LocalDateTime.now());
@@ -122,7 +119,7 @@ public class OtpServiceImp implements OtpService {
 
     @Override
     public void generateAndSendOtp(String email) {
-        String otp = String.format("%06d", new Random().nextInt(999999));
+        String otp = String.format("%06d", returnRandom());
         log.info("Generated OTP {} for email {}", otp, email);
 
         LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
@@ -156,5 +153,12 @@ public class OtpServiceImp implements OtpService {
 
         otpRepository.delete(otpAndUser); // OTP is valid, clean it up
         return true;
+    }
+
+
+    // --------------------------- HELPER METHODS --------------------------- //
+
+    private int returnRandom(){
+        return randomGenerator.nextInt(999999);
     }
 }

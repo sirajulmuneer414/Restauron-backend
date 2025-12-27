@@ -23,7 +23,7 @@ public class EmployeeProfileController {
     @Autowired private EmployeeService employeeService;
 
     @GetMapping("/details/{encryptedId}")
-    public ResponseEntity<?> getEmployeeDetails(@PathVariable String encryptedId) {
+    public ResponseEntity<EmployeeViewDto> getEmployeeDetails(@PathVariable String encryptedId) {
 
         log.info("Request received to fetch details of employee using ID: {}", encryptedId);
 
@@ -34,16 +34,16 @@ public class EmployeeProfileController {
         }catch (EntityNotFoundException e) {
             log.warn("Could not find employee with encrypted ID {}: {}", encryptedId, e.getMessage());
 
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }catch (Exception e) {
             log.error("An unexpected error occurred while fetching employee details.",e);
-            return new ResponseEntity<>("An error occurred on the server.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.internalServerError().build();
         }
     }
 
 
     @PutMapping("/update/{encryptedId}")
-    public ResponseEntity<?> updateEmployeeDetails(
+    public ResponseEntity<EmployeeViewDto> updateEmployeeDetails(
             @PathVariable String encryptedId,
             @RequestBody UpdateEmployeeRequestDto updateDto
     ){
@@ -57,10 +57,10 @@ public class EmployeeProfileController {
             return ResponseEntity.ok(employeeViewDto);
         } catch (EntityNotFoundException e) {
             log.warn("Update failed. Could not find employee with encrypted ID {}: {}", encryptedId, e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             log.error("An unexpected error occurred while updating employee.", e);
-            return new ResponseEntity<>("Failed to update employee.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.internalServerError().build();
         }
     }
 

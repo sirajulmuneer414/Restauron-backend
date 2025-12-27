@@ -39,14 +39,14 @@ public class CustomerProfileGeneralController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateMyProfile(@RequestHeader("X-Customer-Id") String encryptedCustomerId, @RequestBody CustomerUpdateRequest updateRequest) {
+    public ResponseEntity<String> updateMyProfile(@RequestHeader("X-Customer-Id") String encryptedCustomerId, @RequestBody CustomerUpdateRequest updateRequest) {
         customerProfileService.updateProfile(encryptedCustomerId, updateRequest);
         return ResponseEntity.ok("Profile updated successfully");
     }
 
     // DELETE /api/customer/profile/delete
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteMyAccount(@RequestHeader("X-Customer-Id") String encryptedCustomerId) {
+    public ResponseEntity<String> deleteMyAccount(@RequestHeader("X-Customer-Id") String encryptedCustomerId) {
 
 
         customerProfileService.deleteAccount(encryptedCustomerId);

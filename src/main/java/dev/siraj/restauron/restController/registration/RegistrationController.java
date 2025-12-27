@@ -38,14 +38,14 @@ public class RegistrationController {
 
     @PostMapping("/check-email")
     public ResponseEntity<Boolean> checkRegistrationEmail(@RequestBody EmailCheckingDto emailCheckingDto){
-        System.out.println("In the controller method to check whether email exists or not");
+        log.info("In the controller method to check whether email exists or not");
         boolean exists = false;
         String email = emailCheckingDto.getEmail();
         String option = emailCheckingDto.getOption();
-        System.out.println(email);
-        System.out.println(option);
+        log.info(email);
+        log.info(option);
         if(option.equals("restaurant")){
-            System.out.println("inside restaurant option method");
+            log.info("inside restaurant option method");
             exists = restaurantInitialService.registrationEmailExists(email);
 
 
@@ -78,8 +78,8 @@ public class RegistrationController {
     @Transactional
     public ResponseEntity<Boolean> registerRestaurant(@ModelAttribute RestaurantRegistrationDto restaurantRegistrationDto){
 
-        System.out.println(restaurantRegistrationDto.getRestaurantEmail());
-        System.out.println(restaurantRegistrationDto.getPassword());
+        log.info(restaurantRegistrationDto.getRestaurantEmail());
+        log.info(restaurantRegistrationDto.getPassword());
 
 
         RestaurantRegistration registeredRestaurant = restaurantInitialService.registerRestaurantForApproval(restaurantRegistrationDto);

@@ -1,4 +1,4 @@
-package dev.siraj.restauron.service.ownerOrderService;
+package dev.siraj.restauron.service.owner.ownerOrderService;
 
 
 

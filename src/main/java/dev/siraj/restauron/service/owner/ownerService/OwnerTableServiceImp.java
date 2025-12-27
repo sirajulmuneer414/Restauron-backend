@@ -1,4 +1,4 @@
-package dev.siraj.restauron.service.ownerService;
+package dev.siraj.restauron.service.owner.ownerService;
 
 
 import dev.siraj.restauron.DTO.owner.restaurantManagement.TableResponseDto;
@@ -7,7 +7,7 @@ import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
 import dev.siraj.restauron.respository.restaurantManagementRepos.RestaurantTableRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerTableService;
+import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerTableService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

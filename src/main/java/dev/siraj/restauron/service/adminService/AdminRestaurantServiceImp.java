@@ -55,7 +55,7 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
     public RestaurantDetailsDto getRestaurantDetails(String encryptedId) {
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found when checking for restaurant details"));
 
         return convertToDetailsDto(restaurant);
     }
@@ -66,7 +66,7 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
     public void updateRestaurant(String encryptedId, RestaurantUpdateDto dto) {
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found when updating restaurant"));
 
         restaurant.setName(dto.getName());
         restaurant.setEmail(dto.getEmail());
@@ -85,7 +85,7 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
     public void updateRestaurantStatus(String encryptedId, AccountStatus newStatus) {
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found when updating status"));
 
         restaurant.setStatus(newStatus);
         restaurantRepository.save(restaurant);
@@ -97,7 +97,7 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
     public void deleteRestaurant(String encryptedId) {
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         if (!restaurantRepository.existsById(restaurantId)) {
-            throw new EntityNotFoundException("Restaurant not found");
+            throw new EntityNotFoundException("Restaurant not found when deleting restaurant");
         }
         // Note: The @OneToMany(cascade=CascadeType.ALL) on employees and
         // @OneToOne(cascade=CascadeType.REMOVE) on owner will handle deletion of dependents.

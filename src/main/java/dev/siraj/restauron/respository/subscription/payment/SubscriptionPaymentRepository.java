@@ -15,4 +15,5 @@ public interface SubscriptionPaymentRepository extends JpaRepository<Subscriptio
 
     List<SubscriptionPayment> findAllByOrderByPaymentDateDesc();
 
+    List<SubscriptionPayment> findTop5ByRestaurant_IdOrderByPaymentDateDesc(Long restaurantId);
 }

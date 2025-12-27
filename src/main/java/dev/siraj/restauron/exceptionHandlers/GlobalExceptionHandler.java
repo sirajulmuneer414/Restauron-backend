@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<String> accessDeniedExceptionHandler(AccessDeniedException e){
 
             log.info("Access denied exception: {} ", e.getMessage());
-            return new ResponseEntity<>("Error - "+e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     /** Handle EntityNotFoundException globally.
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> entityNotFoundExceptionHandler(EntityNotFoundException e){
         log.error("Entity not found exception: {} ", e.getMessage());
-        return new ResponseEntity<>("Error - "+e.getMessage(),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
     }
 
     /** Handle RazorpayException globally.

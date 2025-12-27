@@ -1,4 +1,4 @@
-package dev.siraj.restauron.service.ownerService.interfaces;
+package dev.siraj.restauron.service.owner.ownerService.interfaces;
 
 import dev.siraj.restauron.DTO.owner.restaurantManagement.TableResponseDto;
 import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;

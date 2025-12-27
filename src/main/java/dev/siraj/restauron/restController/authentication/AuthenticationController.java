@@ -33,14 +33,13 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody EmailPasswordDto emailPasswordDto){
+    public ResponseEntity<JwtAuthResponse> loginUser(@RequestBody EmailPasswordDto emailPasswordDto){
 
-        System.out.println("Inside LogInUser");
+        log.info("Inside the login controller for user with email {}", emailPasswordDto.getEmail());
 
         boolean doesUserAllExists = userService.userExistsByEmailId(emailPasswordDto.getEmail());
 
         if(doesUserAllExists){
-            System.out.println("User does exists");
 
                 JwtAuthResponse response =  authenticationService.createResponseToken(emailPasswordDto);
 
@@ -48,12 +47,12 @@ public class AuthenticationController {
         }
 
         if(restaurantInitialService.registrationEmailExists(emailPasswordDto.getEmail())){
-            return new ResponseEntity<>("Please Wait Till your restaurant account is approved", HttpStatus.ACCEPTED);
+            return ResponseEntity.accepted().body(null);
         }
 
 
 
-        return new ResponseEntity<>("Bad Credentials Please Check",HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
 
     }
 
@@ -88,13 +87,13 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         authenticationService.initiatePasswordReset(email);
         return ResponseEntity.ok("Reset link sent to your email.");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
 
         authenticationService.completePasswordReset(request.getToken(), request.getNewPassword());
         return ResponseEntity.ok("Password updated successfully.");

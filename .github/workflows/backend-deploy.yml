@@ -1,0 +1,49 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [ "main" ]
+    # No path filter needed if the whole repo is backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        run: |
+          # We are already in the root, so no 'cd' needed
+          mvn clean package -DskipTests
+          
+          # Build Docker Image
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/restauron-backend:latest .
+          
+          # Push to Hub
+          docker push ${{ secrets.DOCKER_USERNAME }}/restauron-backend:latest
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: restauron-backend
+          environment_name: Restauron-backend-env
+          version_label: "ver-${{ github.run_number }}"
+          region: eu-north-1
+          deployment_package: Dockerrun.aws.json

@@ -2,11 +2,8 @@ package dev.siraj.restauron.restController;
 
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.Roles;
-import dev.siraj.restauron.entity.enums.table.TableStatus;
-import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
 import dev.siraj.restauron.entity.users.Admin;
 import dev.siraj.restauron.entity.users.UserAll;
-import dev.siraj.restauron.respository.restaurantManagementRepos.RestaurantTableRepository;
 import dev.siraj.restauron.service.registrarion.adminRegistrationService.adminRegistrationInterface.AdminRegistrationService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import jakarta.transaction.Transactional;
@@ -29,6 +26,8 @@ public class SettingController implements CommandLineRunner {
     private final AdminRegistrationService adminRegistrationService;
 
     // temp checkings
+
+
 
     // ----------------------------------------------------------------------------------------
 

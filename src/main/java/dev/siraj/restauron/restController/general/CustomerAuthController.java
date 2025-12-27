@@ -11,7 +11,6 @@ import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService
 import dev.siraj.restauron.service.customer.customerAuthService.CustomerAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +20,14 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class CustomerAuthController {
 
-    @Autowired private CustomerAuthService customerAuthService;
-    @Autowired private RefreshTokenService refreshTokenService;
+     private final CustomerAuthService customerAuthService;
+     private final RefreshTokenService refreshTokenService;
+
+     @Autowired
+    public CustomerAuthController(CustomerAuthService customerAuthService, RefreshTokenService refreshTokenService) {
+        this.customerAuthService = customerAuthService;
+        this.refreshTokenService = refreshTokenService;
+    }
 
 
     @PostMapping("/login")

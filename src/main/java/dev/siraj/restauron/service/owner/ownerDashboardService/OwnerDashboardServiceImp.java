@@ -102,7 +102,7 @@ public class OwnerDashboardServiceImp implements OwnerDashboardService {
                         (String) row[1],
                         ((Number) row[2]).longValue(),
                         ((Number) row[3]).doubleValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

@@ -1,4 +1,4 @@
-package dev.siraj.restauron.service.ownerService;
+package dev.siraj.restauron.service.owner.ownerService;
 
 import dev.siraj.restauron.DTO.common.PageRequestDto;
 import dev.siraj.restauron.DTO.customer.blockInfo.UnblockRequestDetailsDto;
@@ -20,7 +20,7 @@ import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerCustomerService;
+import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerCustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -269,7 +269,7 @@ public class OwnerCustomerServiceImp implements OwnerCustomerService {
                 List<CustomerUnblockRequest> requests = customerUnblockRequestRepository.findByCustomerId(customer.getId()).orElse(new ArrayList<>());
                 dto.setUnblockRequests(requests.stream()
                         .map(this::mapToUnblockRequestDto)
-                        .collect(Collectors.toList()));
+                        .toList());
             } else {
                 dto.setBlocked(false);
             }
@@ -328,7 +328,7 @@ public class OwnerCustomerServiceImp implements OwnerCustomerService {
                 List<CustomerUnblockRequest> requests = customerUnblockRequestRepository.findByCustomerId(customer.getId()).orElse(new ArrayList<>());
                 dto.setUnblockRequests(requests.stream()
                         .map(this::mapToUnblockRequestDto)
-                        .collect(Collectors.toList()));
+                        .toList());
             } else {
                 dto.setBlocked(false);
             }

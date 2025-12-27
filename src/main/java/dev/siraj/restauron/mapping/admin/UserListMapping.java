@@ -63,6 +63,8 @@ public class UserListMapping {
                     Customer customer = customerRepository.findByUser(user);
                     response.setRestaurantName(customer.getRestaurant().getName());
                     break;
+                default:
+                    response.setRestaurantName("N/A");
             }
 
             return response;

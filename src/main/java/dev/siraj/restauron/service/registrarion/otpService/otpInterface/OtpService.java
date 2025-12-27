@@ -10,7 +10,6 @@ public interface OtpService {
 
     boolean verifyOtpUsingEmail(OtpDto otpDto, String userId);
 
-    void resendOtpUsingEmail(String email);
 
     boolean resendOtpUsingRestaurantRegistrationId(RestaurantRegistration userId);
 

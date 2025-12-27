@@ -2,7 +2,7 @@ package dev.siraj.restauron.restController.owner.requests;
 
 
 import dev.siraj.restauron.DTO.owner.customerManagement.RejectRequestDto;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerCustomerService;
+import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerCustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

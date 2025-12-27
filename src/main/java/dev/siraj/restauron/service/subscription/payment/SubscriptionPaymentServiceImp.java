@@ -34,26 +34,45 @@ import java.util.List;
 @Slf4j
 public class SubscriptionPaymentServiceImp implements SubscriptionPaymentService {
 
-    @Autowired
-    private SubscriptionPackageRepository packageRepository;
+
+    private final SubscriptionPackageRepository packageRepository;
+
+
+    private final RazorpayClient razorpayClient;
+
+
+    private final RazorpayConfig razorpayConfig;
+
+
+    private final RestaurantRepository restaurantRepository;
+
+
+    private final SubscriptionPaymentRepository paymentRepository;
+
+
+    private final RestaurantSubscriptionRepository subscriptionRepository;
+
+
+    private final IdEncryptionService idEncryptionService;
+
 
     @Autowired
-    private RazorpayClient razorpayClient;
+    public SubscriptionPaymentServiceImp(SubscriptionPackageRepository packageRepository,
+                                         RazorpayClient razorpayClient,
+                                         RazorpayConfig razorpayConfig,
+                                         RestaurantRepository restaurantRepository,
+                                         SubscriptionPaymentRepository paymentRepository,
+                                         RestaurantSubscriptionRepository subscriptionRepository,
+                                         IdEncryptionService idEncryptionService) {
+        this.packageRepository = packageRepository;
+        this.razorpayClient = razorpayClient;
+        this.razorpayConfig = razorpayConfig;
+        this.restaurantRepository = restaurantRepository;
+        this.paymentRepository = paymentRepository;
+        this.subscriptionRepository = subscriptionRepository;
+        this.idEncryptionService = idEncryptionService;
+    }
 
-    @Autowired
-    private RazorpayConfig razorpayConfig;
-
-    @Autowired
-    private RestaurantRepository restaurantRepository;
-
-    @Autowired
-    private SubscriptionPaymentRepository paymentRepository;
-
-    @Autowired
-    private RestaurantSubscriptionRepository subscriptionRepository;
-
-    @Autowired
-    private IdEncryptionService idEncryptionService;
 
     /**
      * Create a subscription order in Razorpay for the given package and restaurant.
@@ -73,7 +92,7 @@ public class SubscriptionPaymentServiceImp implements SubscriptionPaymentService
 
         // Logic to calculate final price (apply Offer if exists)
         double finalPrice = pkg.getPrice();
-        if(pkg.getOffer() != null && pkg.getOffer().getDiscount() > 0) {
+        if(pkg.getOffer() != null && pkg.getOffer().getDiscount() != null && pkg.getOffer().getDiscount() > 0) {
             // Simplified offer logic
             if("PERCENT".equalsIgnoreCase(pkg.getOffer().getDiscountType())) {
                 finalPrice = finalPrice - (finalPrice * (pkg.getOffer().getDiscount() / 100));
@@ -90,7 +109,7 @@ public class SubscriptionPaymentServiceImp implements SubscriptionPaymentService
 
         Order order = razorpayClient.orders.create(orderRequest);
 
-        System.out.println(order.get("id").toString());
+        log.info(order.get("id").toString());
 
 
 

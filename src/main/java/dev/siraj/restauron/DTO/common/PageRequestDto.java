@@ -58,7 +58,7 @@ public class PageRequestDto {
     }
 
     public boolean isSearchable(){
-        return search != null || !search.trim().isEmpty();
+        return search != null && !search.trim().isEmpty();
     }
 
 }

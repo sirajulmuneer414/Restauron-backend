@@ -4,13 +4,21 @@ import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import lombok.Data;
 
-import java.util.UUID;
+import java.io.Serial;
+import java.io.Serializable;
 
-    // UserAll entity representing all users in the system
+
+// UserAll entity representing all users in the system
 
 @Entity
-public class UserAll {
+@Data
+
+public class UserAll implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO )
@@ -33,56 +41,5 @@ public class UserAll {
     @Enumerated(value = EnumType.STRING)
     private AccountStatus status;
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public @Email String getEmail() {
-        return email;
-    }
-
-    public void setEmail(@Email String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Roles getRole() {
-        return role;
-    }
-
-    public void setRole(Roles role) {
-        this.role = role;
-    }
-
-    public AccountStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AccountStatus status) {
-        this.status = status;
-    }
 
 }

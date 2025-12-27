@@ -15,6 +15,7 @@ import dev.siraj.restauron.DTO.websocket.notification.OrderAlertDTO;
 import dev.siraj.restauron.entity.enums.OrderStatus;
 import dev.siraj.restauron.entity.enums.OrderType;
 import dev.siraj.restauron.entity.enums.PaymentMode;
+import dev.siraj.restauron.entity.enums.table.TableStatus;
 import dev.siraj.restauron.entity.menuManagement.MenuItem;
 import dev.siraj.restauron.entity.orderManagement.Order;
 import dev.siraj.restauron.entity.orderManagement.OrderItem;
@@ -53,6 +54,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -163,6 +166,7 @@ public class OrderServiceImp implements OrderService {
                 throw new BadCredentialsException("Selected table does not belong to this restaurant.");
             }
             order.setRestaurantTable(table);
+            table.setStatus(TableStatus.OCCUPIED);
         }
 
         // 2. Process items
@@ -200,6 +204,21 @@ public class OrderServiceImp implements OrderService {
             order.setStatus(newStatus);
             Order updatedOrder = orderRepository.save(order);
             notificationService.sendRefreshSignal(encryptedRestaurantId,"STATUS_UPDATE");
+
+            if(newStatus == OrderStatus.COMPLETED && order.getOrderType() == OrderType.DINE_IN){
+                RestaurantTable table = order.getRestaurantTable();
+                if(table != null){
+                    table.setStatus(TableStatus.AVAILABLE);
+                    restaurantTableRepository.save(table);
+                }
+            }
+            if(newStatus == OrderStatus.CANCELLED && order.getOrderType() == OrderType.DINE_IN){
+                RestaurantTable table = order.getRestaurantTable();
+                if(table != null ){
+                    table.setStatus(TableStatus.AVAILABLE);
+                    restaurantTableRepository.save(table);
+                }
+            }
             return toOrderDetailDto(updatedOrder);
         } catch (IllegalArgumentException e) {
             throw new BadCredentialsException("Invalid status value provided: " + status);
@@ -283,6 +302,7 @@ public class OrderServiceImp implements OrderService {
             orderItem.setQuantity(quantity);
             orderItem.setPriceAtOrder(menuItem.getPrice());
             orderItems.add(orderItem);
+
 
             totalAmount += menuItem.getPrice() * quantity;
         }
@@ -435,7 +455,13 @@ public class OrderServiceImp implements OrderService {
         dto.setOrderType(order.getOrderType().name());
         dto.setStatus(order.getStatus().name());
         dto.setTotalAmount(order.getTotalAmount().toString());
-        dto.setOrderDate(order.getOrderDate());
+        dto.setOrderDate(
+                LocalDateTime.of(
+                        order.getOrderDate(),
+                        order.getOrderTime() != null ? order.getOrderTime() : LocalTime.MIDNIGHT
+                )
+        );
+
 
 
         return dto;

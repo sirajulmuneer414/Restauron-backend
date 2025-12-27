@@ -1,4 +1,4 @@
-package dev.siraj.restauron.service.ownerService.interfaces;
+package dev.siraj.restauron.service.owner.ownerService.interfaces;
 
 import dev.siraj.restauron.DTO.common.PageRequestDto;
 import dev.siraj.restauron.DTO.owner.customerManagement.CustomerDetailDto;

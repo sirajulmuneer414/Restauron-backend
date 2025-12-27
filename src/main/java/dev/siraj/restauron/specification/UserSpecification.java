@@ -1,14 +1,10 @@
 package dev.siraj.restauron.specification;
 
 import dev.siraj.restauron.entity.enums.Roles;
-import dev.siraj.restauron.entity.restaurant.Restaurant;
-import dev.siraj.restauron.entity.users.Customer;
-import dev.siraj.restauron.entity.users.Employee;
-import dev.siraj.restauron.entity.users.Owner;
+
 import dev.siraj.restauron.entity.users.UserAll;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +42,5 @@ public class UserSpecification {
         }
     }
 
-// NOTE: For the joins (root.join("owner"), etc.) to work, you must have the corresponding
-// @OneToOne mappings in your UserAll entity, like:
-// @OneToOne(mappedBy = "user")
-// private Owner owner;
+
 

@@ -3,9 +3,11 @@ package dev.siraj.restauron.restController.admin;
 import dev.siraj.restauron.DTO.admin.RestaurantInitialResponse;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.restaurant.RestaurantRegistration;
 import dev.siraj.restauron.service.adminService.adminServiceInterface.AdminService;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -47,7 +49,7 @@ public class AdminRestaurantRegistrationController {
 
     // Inorder to fetch individual request details
     @GetMapping("/request/{restaurantRegistrationId}")
-    public ResponseEntity<?> getRestaurantDetails(@PathVariable Long restaurantRegistrationId){
+    public ResponseEntity<RestaurantRegistration> getRestaurantDetails(@PathVariable Long restaurantRegistrationId){
 
         log.info("In the API for getting individual restaurant registration details");
 
@@ -59,7 +61,12 @@ public class AdminRestaurantRegistrationController {
 
         }
 
-        return new ResponseEntity<>("Restaurant not found", HttpStatus.BAD_REQUEST);
+        else {
+
+            log.error("No restaurant registration found with id : {}", restaurantRegistrationId);
+            throw new EntityNotFoundException("Restaurant Registration not found");
+
+        }
 
     }
 
@@ -68,7 +75,7 @@ public class AdminRestaurantRegistrationController {
 
     // Method to update the AccountStatus to REJECTED, PENDING or VERIFIED
     @PostMapping("/status-update")
-    public ResponseEntity<?> setRestaurantStatus(@RequestParam("restaurantId") Long restaurantId,
+    public ResponseEntity<Boolean> setRestaurantStatus(@RequestParam("restaurantId") Long restaurantId,
                                                  @RequestParam("statusUpdateTo") String StatusUpdateTo){
 
 

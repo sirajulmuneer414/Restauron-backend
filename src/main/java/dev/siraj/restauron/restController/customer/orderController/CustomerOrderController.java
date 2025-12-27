@@ -22,7 +22,7 @@ public class CustomerOrderController {
     @Autowired private OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request, @RequestHeader("X-Customer-Id") String customerId) {
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody CreateOrderRequest request, @RequestHeader("X-Customer-Id") String customerId) {
 
         log.info("Inside the customer order controller with customer Id : {}",customerId);
         try {
@@ -30,14 +30,9 @@ public class CustomerOrderController {
             log.info("Successfully created the order and sending it to front-end");
             return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println(e.getLocalizedMessage());
-            System.out.println(e.getClass());
-            Arrays.stream(e.getStackTrace()).map(item -> {
-                System.out.println(item);
-                return null;
-            });
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+
+
+            throw new RuntimeException("Error creating order: " + e.getMessage());
         }
     }
 

@@ -3,16 +3,14 @@ package dev.siraj.restauron.restController.owner;
 
 import dev.siraj.restauron.DTO.owner.restaurantManagement.TableResponseDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerService;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerTableService;
+import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerService;
+import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerTableService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.event.WindowFocusListener;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;

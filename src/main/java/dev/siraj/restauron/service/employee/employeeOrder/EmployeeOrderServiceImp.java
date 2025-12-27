@@ -8,11 +8,12 @@ import dev.siraj.restauron.entity.enums.OrderStatus;
 import dev.siraj.restauron.entity.orderManagement.Order;
 import dev.siraj.restauron.respository.orderRepo.OrderRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
-import dev.siraj.restauron.service.websocket.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 // This is implementation for Employee Order Service
@@ -69,7 +70,13 @@ public class EmployeeOrderServiceImp implements EmployeeOrderService {
         dto.setOrderType(order.getOrderType().name());
         dto.setStatus(order.getStatus().name());
         dto.setTotalAmount(order.getTotalAmount().toString());
-        dto.setOrderDate(order.getOrderDate());
+        dto.setOrderDate(
+                LocalDateTime.of(
+                        order.getOrderDate(),
+                        order.getOrderTime() != null ? order.getOrderTime() : LocalTime.MIDNIGHT
+                )
+        );
+
 
 
         return dto;
@@ -90,7 +97,13 @@ public class EmployeeOrderServiceImp implements EmployeeOrderService {
         dto.setOrderType(order.getOrderType().name());
         dto.setStatus(order.getStatus().name());
         dto.setTotalAmount(order.getTotalAmount().toString());
-        dto.setOrderDate(order.getOrderDate());
+        dto.setOrderDate(
+                LocalDateTime.of(
+                        order.getOrderDate(),
+                        order.getOrderTime() != null ? order.getOrderTime() : LocalTime.MIDNIGHT
+                )
+        );
+
 
         dto.setItems(order.getItems().stream().map(item -> {
             OrderItemResponse itemDto = new OrderItemResponse();

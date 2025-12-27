@@ -3,7 +3,6 @@ package dev.siraj.restauron.DTO.owner.orderManagement;
 import dev.siraj.restauron.entity.enums.OrderStatus;
 import dev.siraj.restauron.entity.enums.OrderType;
 import dev.siraj.restauron.entity.enums.PaymentMode;
-import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalTime;

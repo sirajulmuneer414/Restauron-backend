@@ -1,4 +1,4 @@
-package dev.siraj.restauron.service.ownerService;
+package dev.siraj.restauron.service.owner.ownerService;
 
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Owner;
@@ -6,9 +6,8 @@ import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.respository.ownerRepo.OwnerRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
-import dev.siraj.restauron.service.ownerService.interfaces.OwnerService;
+import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerService;
 import jakarta.persistence.EntityNotFoundException;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

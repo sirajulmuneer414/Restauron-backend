@@ -8,6 +8,7 @@ import dev.siraj.restauron.mapping.admin.UserListMapping;
 import dev.siraj.restauron.respository.userRepo.UserRepository;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import dev.siraj.restauron.specification.UserSpecification;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,7 +42,6 @@ public class UserServiceImp implements UserService {
     @Override
     public UserAll findUserByEmail(String email) {
         UserAll user = repository.findByEmail(email);
-        System.out.println(user.getId());
 
         return user;
     }
@@ -69,7 +69,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserAll findUserById(Long userId) {
-        return repository.findById(userId).get();
+        return repository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
     }
 
     @Override

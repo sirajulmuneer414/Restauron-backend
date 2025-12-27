@@ -17,14 +17,27 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class RestaurantConfigServiceImp implements RestaurantConfigService {
 
+    private static final String DEFAULT_PRIMARY_COLOR = "#f59e0b"; // Default Yellow
+    private static final String DEFAULT_SECONDARY_COLOR = "#000000"; // Default Black
+
+
+    private final RestaurantRepository restaurantRepository;
+    private final RestaurantConfigRepository restaurantConfigRepository;
+    private final IdEncryptionService idEncryptionService;
+    private final ImageUploadService  imageUploadService;
+
     @Autowired
-    private RestaurantRepository restaurantRepository;
-    @Autowired
-    private RestaurantConfigRepository restaurantConfigRepository;
-    @Autowired
-    private IdEncryptionService idEncryptionService;
-    @Autowired
-    private ImageUploadService  imageUploadService;
+    public RestaurantConfigServiceImp(RestaurantRepository restaurantRepository,
+                                     RestaurantConfigRepository restaurantConfigRepository,
+                                     IdEncryptionService idEncryptionService,
+                                     ImageUploadService imageUploadService) {
+        this.restaurantRepository = restaurantRepository;
+        this.restaurantConfigRepository = restaurantConfigRepository;
+        this.idEncryptionService = idEncryptionService;
+        this.imageUploadService = imageUploadService;
+    }
+
+
 
     @Override
     public RestaurantConfigDTO getConfigByEncryptedId(String encryptedId) {
@@ -45,6 +58,7 @@ public class RestaurantConfigServiceImp implements RestaurantConfigService {
 
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
 
+
         // 1. Find the Restaurant using the ID from the Header
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with ID: " + encryptedRestaurantId));
@@ -54,9 +68,9 @@ public class RestaurantConfigServiceImp implements RestaurantConfigService {
                 .orElse(RestaurantConfig.builder()
                         .restaurant(restaurant)
                         // Set reasonable defaults for a new config
-                        .primaryColor("#f59e0b")
-                        .secondaryColor("#000000")
-                        .buttonTextColor("#000000")
+                        .primaryColor(DEFAULT_PRIMARY_COLOR)
+                        .secondaryColor(DEFAULT_SECONDARY_COLOR)
+                        .buttonTextColor(DEFAULT_SECONDARY_COLOR)
                         .build());
 
         // 3. Upload Image if provided (and not empty)
@@ -118,9 +132,9 @@ public class RestaurantConfigServiceImp implements RestaurantConfigService {
     private RestaurantConfigDTO createDefaultConfigDTO(Restaurant r) {
         RestaurantConfigDTO dto = new RestaurantConfigDTO();
         dto.setRestaurantName(r.getName());
-        dto.setPrimaryColor("#f59e0b"); // Default Yellow
-        dto.setSecondaryColor("#000000");
-        dto.setButtonTextColor("#000000");
+        dto.setPrimaryColor(DEFAULT_PRIMARY_COLOR); // Default Yellow
+        dto.setSecondaryColor(DEFAULT_SECONDARY_COLOR); // Default Black
+        dto.setButtonTextColor(DEFAULT_SECONDARY_COLOR); // Default Black
         return dto;
     }
 }

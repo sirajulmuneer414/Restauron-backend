@@ -20,7 +20,7 @@ public class HomeController {
     @Autowired private RestaurantService restaurantService;
 
     @GetMapping("/restaurant/details/{encryptedId}")
-    public ResponseEntity<?> getRestaurantDetails(@PathVariable String encryptedId){
+    public ResponseEntity<PublicViewRestaurantDto> getRestaurantDetails(@PathVariable String encryptedId){
 
         log.info("Public request received for restaurant details with encrypted ID: {}", encryptedId);
         try {
@@ -28,10 +28,10 @@ public class HomeController {
             return ResponseEntity.ok(restaurantDetails);
         } catch (EntityNotFoundException e) {
             log.warn("Public request failed. Could not find restaurant: {}", e.getMessage());
-            return new ResponseEntity<>("Restaurant not found.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             log.error("An unexpected public API error occurred.", e);
-            return new ResponseEntity<>("An error occurred on the server.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

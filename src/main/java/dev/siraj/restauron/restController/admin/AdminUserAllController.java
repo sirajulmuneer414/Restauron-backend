@@ -38,7 +38,7 @@ public class AdminUserAllController {
 
     // This method is for fetching all user ( Filters and Pagination applicable )
     @PostMapping("/fetch-list")
-    public ResponseEntity<?> fetchUserFullListWithFiltersAndPagination(@RequestBody PageRequestDto pageRequestDto){
+    public ResponseEntity<Page<UserListResponse>> fetchUserFullListWithFiltersAndPagination(@RequestBody PageRequestDto pageRequestDto){
         log.info("In the userAll list fetch method from admin side");
 
 
