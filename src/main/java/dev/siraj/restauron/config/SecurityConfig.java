@@ -45,7 +45,7 @@ public class SecurityConfig {
     }
 
 
-    // Security filter chain configuration
+    // Security filter chain configuration method
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
