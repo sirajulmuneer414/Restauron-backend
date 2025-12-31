@@ -31,7 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-
-### files to ignore ###
-src/main/resources/application.yaml
