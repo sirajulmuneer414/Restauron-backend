@@ -9,11 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/api/employee")
 @Slf4j
 public class EmployeeGeneralController {
 
-    @Autowired private EmployeeService employeeService;
+    private final EmployeeService employeeService;
+
+    @Autowired
+    public EmployeeGeneralController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
     @GetMapping("/get-restaurant-details/{employeeUserId}")
     public ResponseEntity<RestaurantReduxSettingDto> getRestaurantDetailsForEmployeeLogin(@PathVariable String employeeUserId){

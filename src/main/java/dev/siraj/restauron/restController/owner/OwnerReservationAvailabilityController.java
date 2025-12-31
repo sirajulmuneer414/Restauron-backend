@@ -20,16 +20,28 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/owner/reservation-availability")
+@RequestMapping("/api/owner/reservation-availability")
 @RolesAllowed(roles = {"OWNER"})
 public class OwnerReservationAvailabilityController {
 
+
+    private final AvailabilityCheckingService availabilityCheckingService;
+
+    private final WeeklyAvailabilityService weeklyAvailabilityService;
+
+    private final DailyOverrideService dailyOverrideService;
+
+
     @Autowired
-    private AvailabilityCheckingService availabilityCheckingService;
-    @Autowired
-    private WeeklyAvailabilityService weeklyAvailabilityService;
-    @Autowired
-    private DailyOverrideService dailyOverrideService;
+    public OwnerReservationAvailabilityController(
+            AvailabilityCheckingService availabilityCheckingService,
+            WeeklyAvailabilityService weeklyAvailabilityService,
+            DailyOverrideService dailyOverrideService
+    ) {
+        this.availabilityCheckingService = availabilityCheckingService;
+        this.weeklyAvailabilityService = weeklyAvailabilityService;
+        this.dailyOverrideService = dailyOverrideService;
+    }
 
     // ------------------------------------------- AVAILABILITY CHECKING --------------------------------------------------
 

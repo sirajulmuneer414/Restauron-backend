@@ -3,12 +3,10 @@ package dev.siraj.restauron.restController.subscription.payment;
 import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentInitiateDTO;
 import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentVerifyDTO;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.respository.ownerRepo.OwnerRepository;
 import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.subscription.payment.interfaces.SubscriptionPaymentService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,19 +14,24 @@ import org.springframework.web.bind.annotation.*;
 
 // REST controller for handling owner payment-related endpoints
 @RestController
-@RequestMapping("/owner/payments")
+@RequestMapping("/api/owner/payments")
 @RolesAllowed(roles = {"OWNER", "ADMIN"})
 @Slf4j
 public class OwnerPaymentController {
 
-    @Autowired
-    private IdEncryptionService idEncryptionService;
 
-    @Autowired
-    private SubscriptionPaymentService paymentService;
+    private final IdEncryptionService idEncryptionService;
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    private final SubscriptionPaymentService paymentService;
+
+    private final RestaurantRepository restaurantRepository;
+
+
+    public OwnerPaymentController(SubscriptionPaymentService paymentService, IdEncryptionService idEncryptionService, RestaurantRepository restaurantRepository) {
+        this.idEncryptionService = idEncryptionService;
+        this.restaurantRepository = restaurantRepository;
+        this.paymentService = paymentService;
+    }
 
     @Value("${razorpay.key.id}")
     private String razorpayKeyId;

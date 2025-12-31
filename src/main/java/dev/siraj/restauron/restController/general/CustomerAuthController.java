@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/public/auth")
+@RequestMapping("/api/public/auth")
 @Slf4j
 public class CustomerAuthController {
 

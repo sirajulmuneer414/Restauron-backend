@@ -15,11 +15,16 @@ import org.springframework.web.bind.annotation.*;
 // Controller class for reservation operations from owner side
 @Slf4j
 @RestController
-@RequestMapping("/owner/reservations")
+@RequestMapping("/api/owner/reservations")
 public class OwnerReservationController {
 
+
+    private final ReservationService reservationService;
+
     @Autowired
-    private ReservationService reservationService;
+    public OwnerReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
 
 
     /**

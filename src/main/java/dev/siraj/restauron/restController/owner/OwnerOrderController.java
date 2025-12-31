@@ -15,13 +15,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/owner/orders")
+@RequestMapping("/api/owner/orders")
 @RolesAllowed(roles = {"OWNER"}) // Assuming you have role-based security
 @Slf4j
 public class OwnerOrderController {
 
-    @Autowired private OrderService orderService;
+    private final OrderService orderService;
 
+
+    @Autowired
+    public OwnerOrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     // POST /owner/orders
     @PostMapping

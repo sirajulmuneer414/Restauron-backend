@@ -13,12 +13,16 @@ import java.util.List;
 // Controller for Employee Table related endpoints
 
 @RestController
-@RequestMapping("/employee/tables")
+@RequestMapping("/api/employee/tables")
 @RolesAllowed(roles = {"EMPLOYEE"})
 public class EmployeeTablesController {
 
+    private final EmployeeTableService employeeTableService;
+
     @Autowired
-    private EmployeeTableService employeeTableService;
+    public EmployeeTablesController(EmployeeTableService employeeTableService) {
+        this.employeeTableService = employeeTableService;
+    }
 
     /**
      * Endpoint to retrieve all tables for a restaurant.

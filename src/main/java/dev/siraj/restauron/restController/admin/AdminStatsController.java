@@ -3,8 +3,7 @@ package dev.siraj.restauron.restController.admin;
 import dev.siraj.restauron.DTO.admin.stats.RestaurantSummaryDTO;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
 import dev.siraj.restauron.service.adminService.adminServiceInterface.AdminStatusService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,13 +18,16 @@ import java.util.Map;
 
 @RestController
 @RolesAllowed(roles = {"ADMIN"})
-@RequestMapping("/admin/stats")
+@RequestMapping("/api/admin/stats")
+@Slf4j
 public class AdminStatsController {
 
-    private static final Logger log = LoggerFactory.getLogger(AdminStatsController.class);
-    @Autowired
-    private AdminStatusService adminStatsService;
 
+    private final AdminStatusService adminStatsService;
+
+    public AdminStatsController(AdminStatusService adminStatsService) {
+        this.adminStatsService = adminStatsService;
+    }
 
     /**
      * Controller method to get total number of restaurants

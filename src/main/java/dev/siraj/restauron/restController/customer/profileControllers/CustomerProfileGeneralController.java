@@ -4,19 +4,22 @@ package dev.siraj.restauron.restController.customer.profileControllers;
 import dev.siraj.restauron.DTO.customer.profileGeneral.CustomerStatusDto;
 import dev.siraj.restauron.DTO.customer.profileGeneral.CustomerUpdateRequest;
 import dev.siraj.restauron.DTO.owner.customerManagement.CustomerResponseDto;
-import dev.siraj.restauron.entity.users.Customer;
 import dev.siraj.restauron.service.customer.profileServices.CustomerProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/customer/profile")
+@RequestMapping("/api/customer/profile")
 public class CustomerProfileGeneralController {
 
 
+    private final CustomerProfileService customerProfileService;
+
     @Autowired
-    private CustomerProfileService customerProfileService;
+    public CustomerProfileGeneralController(CustomerProfileService customerProfileService) {
+        this.customerProfileService = customerProfileService;
+    }
 
 
     @GetMapping("/status/{userId}")

@@ -6,7 +6,6 @@ import dev.siraj.restauron.DTO.owner.EmployeeViewDto;
 import dev.siraj.restauron.DTO.owner.UpdateEmployeeRequestDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
 import dev.siraj.restauron.service.employee.employeeManagementService.EmployeeManagementService;
-import dev.siraj.restauron.service.restaurantService.restaurantServiceInterface.RestaurantService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,17 +20,19 @@ import org.springframework.web.multipart.MultipartFile;
  */
 
 @RestController
-@RequestMapping("/owner/employees")
+@RequestMapping("/api/owner/employees")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class OwnerEmployeeController {
 
-    @Autowired
-    private RestaurantService restaurantService;
+
+    private final EmployeeManagementService employeeManagementService;
+
 
     @Autowired
-    private EmployeeManagementService employeeManagementService;
-
+    public OwnerEmployeeController(EmployeeManagementService employeeManagementService) {
+        this.employeeManagementService = employeeManagementService;
+    }
 
     /**
      * * Endpoint to fetch a paginated list of employees based on provided filters.

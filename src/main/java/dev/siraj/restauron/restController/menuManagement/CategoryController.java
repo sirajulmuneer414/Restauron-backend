@@ -16,13 +16,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("owner/category")
+@RequestMapping("/api/owner/category")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class CategoryController {
 
+    private final CategoryService categoryService;
+
     @Autowired
-    private CategoryService categoryService;
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<String> createCategoryForMenu(@RequestBody Map<String, String> payload, @RequestHeader("X-Restaurant-Id") String restaurantEncryptedId) throws Exception {

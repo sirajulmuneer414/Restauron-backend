@@ -10,8 +10,6 @@ import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -23,18 +21,24 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequestMapping("/admin/users")
+@RequestMapping("/api/admin/users")
 @RolesAllowed(roles = {"ADMIN"})
+@Slf4j
 public class AdminUserAllController {
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private AdminService adminService;
-    @Autowired
-    private AdminUserService adminUserService;
 
-    private final Logger log = LoggerFactory.getLogger(AdminUserAllController.class);
+    private final UserService userService;
+
+    private final AdminService adminService;
+
+    private final AdminUserService adminUserService;
+
+    public AdminUserAllController(UserService userService, AdminService adminService, AdminUserService adminUserService) {
+        this.userService = userService;
+        this.adminService = adminService;
+        this.adminUserService = adminUserService;
+    }
+
 
     // This method is for fetching all user ( Filters and Pagination applicable )
     @PostMapping("/fetch-list")

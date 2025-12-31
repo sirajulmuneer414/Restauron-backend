@@ -10,11 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("public/menu")
+@RequestMapping("/api/public/menu")
 @Slf4j
 public class CustomerMenuController {
 
-    @Autowired private CustomerMenuService customerMenuService;
+    private final CustomerMenuService customerMenuService;
+
+    @Autowired
+    public CustomerMenuController(CustomerMenuService customerMenuService) {
+        this.customerMenuService = customerMenuService;
+    }
 
     @GetMapping()
     public ResponseEntity<MenuDto> getMenuForCustomer(@RequestHeader("X-Restaurant-Id") String restaurantEncryptedId) {

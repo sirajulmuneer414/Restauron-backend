@@ -5,7 +5,6 @@ import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
 import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
 import dev.siraj.restauron.DTO.authentication.ResetPasswordRequestDTO;
 import dev.siraj.restauron.service.authentication.AuthenticationService;
-import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import dev.siraj.restauron.service.registrarion.registrationInitialService.registrationInitialInterface.RestaurantInitialService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,20 +15,24 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthenticationController {
 
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
+
+    private final AuthenticationService authenticationService;
+
+    private final RestaurantInitialService restaurantInitialService;
+
 
     @Autowired
-    private AuthenticationService authenticationService;
+    public AuthenticationController(UserService userService, AuthenticationService authenticationService, RestaurantInitialService restaurantInitialService) {
+        this.userService = userService;
+        this.authenticationService = authenticationService;
+        this.restaurantInitialService = restaurantInitialService;
 
-    @Autowired
-    private RestaurantInitialService restaurantInitialService;
-
-    @Autowired
-    private RefreshTokenService refreshTokenService;
+    }
 
 
     @PostMapping("/login")

@@ -19,10 +19,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
-@RequestMapping("/owner/customer")
+@RequestMapping("/api/owner/customer")
 public class OwnerCustomerController {
 
-        @Autowired private OwnerCustomerService customerService;
+        private final OwnerCustomerService customerService;
+
+        @Autowired
+        public OwnerCustomerController(OwnerCustomerService customerService) {
+            this.customerService = customerService;
+        }
 
         @PostMapping("/list")
         public ResponseEntity<Page<CustomerResponseDto>> getCustomers(

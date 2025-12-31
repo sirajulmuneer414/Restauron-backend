@@ -16,16 +16,21 @@ import java.util.List;
 // Controller for Employee Order related endpoints
 
 @RestController
-@RequestMapping("/employee/orders")
+@RequestMapping("/api/employee/orders")
 @RolesAllowed(roles = {"EMPLOYEE"})
 @Slf4j
 public class EmployeeOrderController {
 
-    @Autowired
-    private EmployeeOrderService employeeOrderService;
+    private final EmployeeOrderService employeeOrderService;
+
+    private final OrderService orderService;
+
 
     @Autowired
-    private OrderService orderService;
+    public EmployeeOrderController(EmployeeOrderService employeeOrderService, OrderService orderService) {
+        this.employeeOrderService = employeeOrderService;
+        this.orderService = orderService;
+    }
 
     /**
      * Endpoint to create a manual order for a restaurant.

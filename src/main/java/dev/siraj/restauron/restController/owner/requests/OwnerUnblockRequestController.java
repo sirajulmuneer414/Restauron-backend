@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/owner/unblock-requests")
+@RequestMapping("/api/owner/unblock-requests")
 @RequiredArgsConstructor
 public class OwnerUnblockRequestController {
 

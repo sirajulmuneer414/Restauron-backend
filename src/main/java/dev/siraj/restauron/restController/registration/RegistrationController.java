@@ -20,20 +20,21 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 //@CrossOrigin(origins = "http://localhost:5173/")
-@RequestMapping("/registration")
+@RequestMapping("/api/registration")
 public class RegistrationController {
 
-    @Autowired
-    RestaurantInitialService restaurantInitialService;
+    private final RestaurantInitialService restaurantInitialService;
+
+    private final UserService userService;
+
+    private final OtpService otpService;
 
     @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    OtpService otpService;
+    public RegistrationController(RestaurantInitialService restaurantInitialService, UserService userService, OtpService otpService) {
+        this.restaurantInitialService = restaurantInitialService;
+        this.userService = userService;
+        this.otpService = otpService;
+    }
 
 
     @PostMapping("/check-email")

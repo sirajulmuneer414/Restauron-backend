@@ -12,13 +12,17 @@ import org.springframework.web.multipart.MultipartFile;
 // Controller for Restaurant Owner Configuration Endpoints
 
 @RestController
-@RequestMapping("/owner/restaurant/config")
+@RequestMapping("/api/owner/restaurant/config")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class RestaurantOwnerConfigController {
 
+    private final RestaurantConfigService restaurantConfigService;
+
     @Autowired
-    private RestaurantConfigService restaurantConfigService;
+    public RestaurantOwnerConfigController(RestaurantConfigService restaurantConfigService) {
+        this.restaurantConfigService = restaurantConfigService;
+    }
 
     /**
      * Endpoint to get the restaurant configuration for the owner.

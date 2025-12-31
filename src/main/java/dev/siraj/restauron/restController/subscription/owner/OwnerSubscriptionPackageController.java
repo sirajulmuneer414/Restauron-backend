@@ -17,12 +17,17 @@ import java.util.List;
 
 @RestController
 @RolesAllowed(roles = {"OWNER"})
-@RequestMapping("/owner/subscription")
+@RequestMapping("/api/owner/subscription")
 @Slf4j
 public class OwnerSubscriptionPackageController {
 
+
+    private final SubscriptionPackageService subscriptionPackageService;
+
     @Autowired
-    private SubscriptionPackageService subscriptionPackageService;
+    public OwnerSubscriptionPackageController(SubscriptionPackageService subscriptionPackageService) {
+        this.subscriptionPackageService = subscriptionPackageService;
+    }
 
     /**
      * Endpoint to list all active subscription packages for owners

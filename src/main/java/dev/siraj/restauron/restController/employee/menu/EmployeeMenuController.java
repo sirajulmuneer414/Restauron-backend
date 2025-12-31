@@ -18,13 +18,16 @@ import java.util.List;
 // Controller for Employee Menu related endpoints
 
 @RestController
-@RequestMapping("/employee/menu")
+@RequestMapping("/api/employee/menu")
 @RolesAllowed(roles = {"EMPLOYEE"})
 public class EmployeeMenuController {
 
-    @Autowired
-    private EmployeeMenuService employeeMenuService;
+    private final EmployeeMenuService employeeMenuService;
 
+    @Autowired
+    public EmployeeMenuController(EmployeeMenuService employeeMenuService) {
+        this.employeeMenuService = employeeMenuService;
+    }
 
     /**
      * Endpoint to retrieve the menu for a restaurant.

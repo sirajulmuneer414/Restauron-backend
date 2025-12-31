@@ -20,16 +20,20 @@ import java.util.List;
     // REST controller for Owner Dashboard related endpoints
 
 @RestController
-@RequestMapping("/owner/dashboard")
+@RequestMapping("/api/owner/dashboard")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class OwnerDashboardController {
 
-    @Autowired
-    private OwnerDashboardService ownerDashboardService;
+    private final OwnerDashboardService ownerDashboardService;
+
+    private final IdEncryptionService idEncryptionService;
 
     @Autowired
-    private IdEncryptionService idEncryptionService;
+    public OwnerDashboardController(OwnerDashboardService ownerDashboardService, IdEncryptionService idEncryptionService) {
+        this.ownerDashboardService = ownerDashboardService;
+        this.idEncryptionService = idEncryptionService;
+    }
 
 
     /** Endpoint to get sales statistics for the owner's restaurant.

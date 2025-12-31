@@ -13,12 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RolesAllowed(roles = {"OWNER"})
-@RequestMapping("/owner/subscription")
+@RequestMapping("/api/owner/subscription")
 public class OwnerSubscriptionHomeController {
 
 
+    private final OwnerSubscriptionService subscriptionHomeService;
+
     @Autowired
-    private OwnerSubscriptionService subscriptionHomeService;
+    public OwnerSubscriptionHomeController(OwnerSubscriptionService subscriptionHomeService) {
+        this.subscriptionHomeService = subscriptionHomeService;
+    }
 
 
     @GetMapping("/home")

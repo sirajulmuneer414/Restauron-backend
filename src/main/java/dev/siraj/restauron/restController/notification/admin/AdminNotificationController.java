@@ -11,12 +11,16 @@ import org.springframework.web.bind.annotation.*;
 // Admin controller for sending notifications via WebSocket
 
 @RestController
-@RequestMapping("/admin/notify")
+@RequestMapping("/api/admin/notify")
 @RolesAllowed(roles = {"ADMIN"}) // Ensure security
 public class AdminNotificationController {
 
+        private final NotificationService notificationService;
+
         @Autowired
-        private NotificationService notificationService;
+        public AdminNotificationController(NotificationService notificationService) {
+            this.notificationService = notificationService;
+        }
 
 
     /**

@@ -5,17 +5,18 @@ import dev.siraj.restauron.DTO.customer.blockInfo.CustomerBlockInfoDto;
 import dev.siraj.restauron.DTO.customer.blockInfo.UnblockRequestDto;
 import dev.siraj.restauron.service.customer.blockService.CustomerBlockService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/customer/block")
+@RequestMapping("/api/customer/block")
 @Slf4j
 public class CustomerBlockController {
+    private final CustomerBlockService customerBlockService;
 
-    @Autowired
-     private CustomerBlockService customerBlockService;
+    public CustomerBlockController(CustomerBlockService customerBlockService) {
+        this.customerBlockService = customerBlockService;
+    }
 
     @GetMapping("/info/{userId}")
     public ResponseEntity<CustomerBlockInfoDto> getBlockInfo(

@@ -15,7 +15,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 // Class to set up any program that needs to be run the application is being initiated
 @Component
@@ -82,10 +81,6 @@ public class SettingController implements CommandLineRunner {
         adminRegistrationService.saveAdmin(admin);
 
         log.info("Admin created successfully, exiting the method");
-
-
-
-
 
     }
 }

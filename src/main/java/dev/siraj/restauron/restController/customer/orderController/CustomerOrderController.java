@@ -11,15 +11,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 
 @RestController
-@RequestMapping("/customer/orders")
+@RequestMapping("/api/customer/orders")
 @RolesAllowed(roles = {"CUSTOMER"})
 @Slf4j
 public class CustomerOrderController {
 
-    @Autowired private OrderService orderService;
+    private final OrderService orderService;
+
+    @Autowired
+    public CustomerOrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<OrderResponse> createOrder(@RequestBody CreateOrderRequest request, @RequestHeader("X-Customer-Id") String customerId) {

@@ -12,13 +12,17 @@ import org.springframework.web.bind.annotation.*;
     // REST controller for general owner-related endpoints
 
 @RestController
-@RequestMapping("/owner")
+@RequestMapping("/api/owner")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class OwnerGeneralController {
 
+    private final RestaurantService restaurantService;
+
     @Autowired
-    private RestaurantService restaurantService;
+    public OwnerGeneralController(RestaurantService restaurantService) {
+        this.restaurantService = restaurantService;
+    }
 
     /**
      * Endpoint to get restaurant details for the owner after login.

@@ -19,14 +19,18 @@ import java.util.List;
 
 @RestController
 @RolesAllowed(roles = {"ADMIN"})
-@RequestMapping("/admin/payments")
+@RequestMapping("/api/admin/payments")
 @Slf4j
 public class AdminPaymentController
 {
 
 
+    private final SubscriptionPaymentService paymentService;
+
     @Autowired
-    private SubscriptionPaymentService paymentService;
+    public AdminPaymentController(SubscriptionPaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
 
     @GetMapping("/history")

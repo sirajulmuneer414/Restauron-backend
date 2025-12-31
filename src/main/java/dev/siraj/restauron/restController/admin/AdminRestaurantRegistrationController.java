@@ -21,16 +21,21 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequestMapping("/admin/restaurant")
+@RequestMapping("/api/admin/restaurant")
 @RolesAllowed(roles = {"ADMIN"})
 @Slf4j
 public class AdminRestaurantRegistrationController {
 
-    @Autowired
-    private RestaurantInitialService restaurantInitialService;
 
-    @Autowired
-    private AdminService adminService;
+    private final RestaurantInitialService restaurantInitialService;
+
+
+    private final AdminService adminService;
+
+    public AdminRestaurantRegistrationController(RestaurantInitialService restaurantInitialService, AdminService adminService) {
+        this.restaurantInitialService = restaurantInitialService;
+        this.adminService = adminService;
+    }
 
 
 

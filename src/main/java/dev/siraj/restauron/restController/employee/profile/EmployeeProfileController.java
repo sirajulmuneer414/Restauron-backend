@@ -9,18 +9,23 @@ import dev.siraj.restauron.service.employee.employeeService.EmployeeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/employee/profile")
+@RequestMapping("/api/employee/profile")
 @RolesAllowed(roles = {"EMPLOYEE"})
 @Slf4j
 public class EmployeeProfileController {
 
-    @Autowired private EmployeeService employeeService;
+    private final EmployeeService employeeService;
+
+    @Autowired
+    public EmployeeProfileController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
 
     @GetMapping("/details/{encryptedId}")
     public ResponseEntity<EmployeeViewDto> getEmployeeDetails(@PathVariable String encryptedId) {

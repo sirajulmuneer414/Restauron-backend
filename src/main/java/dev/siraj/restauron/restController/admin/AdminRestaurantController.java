@@ -13,11 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/restaurants")
+@RequestMapping("/api/admin/restaurants")
 @Slf4j
 public class AdminRestaurantController {
 
-    @Autowired private AdminRestaurantService adminRestaurantService;
+    private final AdminRestaurantService adminRestaurantService;
+
+    @Autowired
+    public AdminRestaurantController(AdminRestaurantService adminRestaurantService) {
+        this.adminRestaurantService = adminRestaurantService;
+    }
 
     @PostMapping("/fetch-list")
     public ResponseEntity<Page<RestaurantListResponseDto>> fetchRestaurantList(@RequestBody PageRequestDto pageRequestDto) {

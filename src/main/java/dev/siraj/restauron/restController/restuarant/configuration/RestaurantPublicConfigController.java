@@ -12,12 +12,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/public/restaurant/config")
+@RequestMapping("/api/public/restaurant/config")
 @Slf4j
 public class RestaurantPublicConfigController {
 
+
+    private final RestaurantConfigService restaurantConfigService;
+
     @Autowired
-    private RestaurantConfigService restaurantConfigService;
+    public RestaurantPublicConfigController(RestaurantConfigService restaurantConfigService) {
+        this.restaurantConfigService = restaurantConfigService;
+    }
 
     @GetMapping("/{encryptedId}")
     public ResponseEntity<RestaurantConfigDTO> getPublicRestaurantConfig(

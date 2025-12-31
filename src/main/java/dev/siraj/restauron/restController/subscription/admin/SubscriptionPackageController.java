@@ -18,12 +18,17 @@ import java.util.Map;
 // REST controller for managing subscription packages in the admin panel
 
 @RestController
-@RequestMapping("/admin/subscriptions")
+@RequestMapping("/api/admin/subscriptions")
 @Slf4j
 public class SubscriptionPackageController {
 
+
+    private final SubscriptionPackageService subscriptionPackageService;
+
     @Autowired
-    private SubscriptionPackageService subscriptionPackageService;
+    public SubscriptionPackageController(SubscriptionPackageService subscriptionPackageService) {
+        this.subscriptionPackageService = subscriptionPackageService;
+    }
 
     // -------------------------------------------- CONTROLLER METHODS -------------------------------------------------------
 

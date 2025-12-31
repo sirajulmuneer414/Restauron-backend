@@ -12,12 +12,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/owner/menu-items")
+@RequestMapping("/api/owner/menu-items")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class OwnerMenuItemController {
 
-    @Autowired private MenuItemService menuItemService;
+    private final MenuItemService menuItemService;
+
+    @Autowired
+    public OwnerMenuItemController(MenuItemService menuItemService) {
+        this.menuItemService = menuItemService;
+    }
 
     @GetMapping("/search")
     public ResponseEntity<List<MenuItemResponseDto>> getMenuItemsThroughSearch(@RequestHeader("X-Restaurant-Id") String restaurantEncryptedId,

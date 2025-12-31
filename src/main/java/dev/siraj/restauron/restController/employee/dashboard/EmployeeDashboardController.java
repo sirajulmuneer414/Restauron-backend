@@ -14,12 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
     // Controller for Employee Dashboard related endpoints
 
 @RestController
-@RequestMapping("/employee/dashboard")
+@RequestMapping("/api/employee/dashboard")
 @RolesAllowed(roles = {"EMPLOYEE"})
 public class EmployeeDashboardController {
 
+    private final EmployeeDashboardService employeeDashboardService;
+
     @Autowired
-    private EmployeeDashboardService employeeDashboardService;
+    public EmployeeDashboardController(EmployeeDashboardService employeeDashboardService) {
+        this.employeeDashboardService = employeeDashboardService;
+    }
 
 
     /**

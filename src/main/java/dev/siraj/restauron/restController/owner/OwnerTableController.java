@@ -16,13 +16,19 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/owner/tables")
+@RequestMapping("/api/owner/tables")
 @RolesAllowed(roles = {"OWNER"})
 @Slf4j
 public class OwnerTableController {
 
-    @Autowired private OwnerTableService tableService;
-    @Autowired private OwnerService ownerService;
+    private final OwnerTableService tableService;
+    private final OwnerService ownerService;
+
+    @Autowired
+    public OwnerTableController(OwnerTableService tableService, OwnerService ownerService) {
+        this.tableService = tableService;
+        this.ownerService = ownerService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<Void> createTable(@RequestBody Map<String, String> payload, @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {

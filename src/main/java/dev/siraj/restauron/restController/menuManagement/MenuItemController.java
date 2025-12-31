@@ -16,12 +16,16 @@ import java.util.Map;
 
 @RestController
 @RolesAllowed(roles = {"OWNER"})
-@RequestMapping("/owner/menu")
+@RequestMapping("/api/owner/menu")
 @Slf4j
 public class MenuItemController {
 
+        private final MenuItemService menuItemService;
+
         @Autowired
-        private MenuItemService menuItemService;
+        public MenuItemController(MenuItemService menuItemService) {
+            this.menuItemService = menuItemService;
+        }
 
         /**
          * Creates a new menu item.
