@@ -51,7 +51,7 @@ public class SecurityConfig {
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(req -> req.requestMatchers("/registration/*","/registration/*/**","/auth/*","/public/**","/ws-restauron/**", "/v3/api-docs/**",
+                .authorizeHttpRequests(req -> req.requestMatchers("/api/registration/*","/api/registration/*/**","/api/auth/*","/api/public/**","/ws-restauron/**", "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
