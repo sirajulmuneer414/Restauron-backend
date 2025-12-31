@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.function.Function;
 
+// jwt service interface
 public interface JwtService {
     public String extractUsername(String token);
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
