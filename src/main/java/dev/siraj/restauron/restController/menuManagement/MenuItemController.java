@@ -95,7 +95,7 @@ public class MenuItemController {
          * Updates the details of an existing menu item.
          */
         @PutMapping("/update/{menuItemEncryptedId}")
-        public ResponseEntity<String> updateMenuItem(@PathVariable String menuItemEncryptedId, @RequestBody MenuItemRequestDto request) {
+        public ResponseEntity<String> updateMenuItem(@PathVariable String menuItemEncryptedId, @ModelAttribute MenuItemRequestDto request) {
             log.info("Request to update menu item ID: {}  {}  {}", menuItemEncryptedId, request.getName(), request.getIsVegetarian());
             menuItemService.updateMenuItem(menuItemEncryptedId, request);
             log.info("updated menu item successfully");

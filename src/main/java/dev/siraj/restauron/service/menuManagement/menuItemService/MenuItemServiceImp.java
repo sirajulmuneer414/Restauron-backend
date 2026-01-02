@@ -246,11 +246,11 @@ public class MenuItemServiceImp implements MenuItemService{
 
         String imageUrl = null;
 
-        if(!menuItem.getImageUrl().isEmpty()) imageUrl = menuItem.getImageUrl();
+        if(menuItem.getImageUrl() != null  && !menuItem.getImageUrl().isEmpty()) imageUrl = menuItem.getImageUrl();
 
         menuItemRepository.delete(menuItem);
 
-        imageUploadService.deleteImageByUrl(imageUrl);
+        if(imageUrl != null) imageUploadService.deleteImageByUrl(imageUrl);
 
         category.removedMenuItem();
 
