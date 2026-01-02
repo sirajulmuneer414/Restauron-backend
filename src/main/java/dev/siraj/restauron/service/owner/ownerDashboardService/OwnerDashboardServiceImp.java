@@ -183,19 +183,19 @@ public class OwnerDashboardServiceImp implements OwnerDashboardService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
 
-        if(restaurant.getCustomerPageUrl() == null){
+
 
             String encryptedId = idEncryptionService.encryptLongId(restaurant.getId());
 
 
 
-            String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "home";
+            String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "/home";
 
             restaurant.setCustomerPageUrl(customerUrl);
 
             restaurant = restaurantRepository.save(restaurant);
 
-        }
+
 
         return new RestaurantLinkDTO(
                 restaurant.getCustomerPageUrl(),
