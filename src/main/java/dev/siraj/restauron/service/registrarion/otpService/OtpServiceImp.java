@@ -4,7 +4,7 @@ package dev.siraj.restauron.service.registrarion.otpService;
 import dev.siraj.restauron.DTO.registration.OtpDto;
 import dev.siraj.restauron.entity.otpRegistration.OtpAndUser;
 import dev.siraj.restauron.entity.restaurant.RestaurantRegistration;
-import dev.siraj.restauron.respository.otpRepository.OtpAndUserRepository;
+import dev.siraj.restauron.repository.otpRepository.OtpAndUserRepository;
 import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
 import dev.siraj.restauron.service.registrarion.otpService.otpInterface.OtpService;
 import lombok.extern.slf4j.Slf4j;

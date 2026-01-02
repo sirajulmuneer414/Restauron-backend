@@ -2,10 +2,9 @@ package dev.siraj.restauron.service.userService;
 
 import dev.siraj.restauron.DTO.admin.UserListResponse;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
-import dev.siraj.restauron.entity.enums.Roles;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.mapping.admin.UserListMapping;
-import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.repository.userRepo.UserRepository;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import dev.siraj.restauron.specification.UserSpecification;
 import jakarta.persistence.EntityNotFoundException;

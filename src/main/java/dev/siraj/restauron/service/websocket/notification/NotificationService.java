@@ -2,6 +2,7 @@ package dev.siraj.restauron.service.websocket.notification;
 
 import dev.siraj.restauron.DTO.websocket.notification.NotificationDTO;
 import dev.siraj.restauron.DTO.websocket.notification.OrderAlertDTO;
+import dev.siraj.restauron.entity.enums.OrderStatus;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -90,6 +91,57 @@ public class NotificationService {
         payload.put("timestamp", LocalDateTime.now().toString());
 
         messagingTemplate.convertAndSend(destination, payload);
+    }
+
+
+
+    /**
+     * ✨ NEW: Sends order status update to customer subscribed to specific order
+     *
+     * @param orderId     The ID of the order (will be encrypted)
+     * @param orderStatus The new status of the order
+     * @param billNumber  The bill number for display (optional)
+     */
+    public void sendOrderStatusUpdateToCustomer(Long orderId, OrderStatus orderStatus, String billNumber) {
+        String encryptedOrderId = idEncryptionService.encryptLongId(orderId);
+        String destination = "/topic/order/" + encryptedOrderId;
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orderId", encryptedOrderId);
+        payload.put("status", orderStatus.name());
+        payload.put("orderStatus", orderStatus.name()); // For compatibility
+        payload.put("billNumber", billNumber);
+        payload.put("timestamp", LocalDateTime.now().toString());
+        payload.put("message", "Order status updated to " + orderStatus.name());
+
+        messagingTemplate.convertAndSend(destination, payload);
+
+        System.out.println("📤 Sent order status update: " + destination + " -> " + orderStatus.name());
+    }
+
+    /**
+     * ✨ ALTERNATIVE: Send order status update with full order details
+     * Use this if you want to send more information to the customer
+     */
+    public void sendDetailedOrderStatusUpdate(Long orderId, OrderStatus orderStatus,
+                                              String billNumber, String restaurantName,
+                                              Double totalAmount) {
+        String encryptedOrderId = idEncryptionService.encryptLongId(orderId);
+        String destination = "/topic/order/" + encryptedOrderId;
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orderId", encryptedOrderId);
+        payload.put("status", orderStatus.name());
+        payload.put("orderStatus", orderStatus.name());
+        payload.put("billNumber", billNumber);
+        payload.put("restaurantName", restaurantName);
+        payload.put("totalAmount", totalAmount);
+        payload.put("timestamp", LocalDateTime.now().toString());
+        payload.put("message", "Order status updated to " + orderStatus.name());
+
+        messagingTemplate.convertAndSend(destination, payload);
+
+        System.out.println("📤 Sent detailed order update: " + destination + " -> " + orderStatus.name());
     }
 
 }

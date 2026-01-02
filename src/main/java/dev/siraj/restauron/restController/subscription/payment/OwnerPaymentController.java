@@ -3,7 +3,7 @@ package dev.siraj.restauron.restController.subscription.payment;
 import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentInitiateDTO;
 import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentVerifyDTO;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.subscription.payment.interfaces.SubscriptionPaymentService;
 import lombok.extern.slf4j.Slf4j;

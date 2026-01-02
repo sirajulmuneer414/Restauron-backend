@@ -4,8 +4,8 @@ package dev.siraj.restauron.service.reservation.reservationAvailability.availabi
 import dev.siraj.restauron.entity.restaurant.management.reservation.DailyOverride;
 import dev.siraj.restauron.entity.restaurant.management.reservation.Slots;
 import dev.siraj.restauron.entity.restaurant.management.reservation.WeeklyAvailability;
-import dev.siraj.restauron.respository.reservation.reservationAvailability.dailyOverrideRepo.DailyOverrideRepository;
-import dev.siraj.restauron.respository.reservation.reservationAvailability.weeklyAvailabiliyRepo.WeeklyAvailabilityRepository;
+import dev.siraj.restauron.repository.reservation.reservationAvailability.dailyOverrideRepo.DailyOverrideRepository;
+import dev.siraj.restauron.repository.reservation.reservationAvailability.weeklyAvailabiliyRepo.WeeklyAvailabilityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

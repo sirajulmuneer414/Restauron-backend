@@ -2,7 +2,7 @@ package dev.siraj.restauron.service.authentication;
 
 
 import dev.siraj.restauron.entity.users.UserAll;
-import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.repository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import io.jsonwebtoken.Claims;
@@ -13,7 +13,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 

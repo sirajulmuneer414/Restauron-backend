@@ -8,7 +8,7 @@ import dev.siraj.restauron.service.adminService.adminServiceInterface.AdminResta
 
 import dev.siraj.restauron.DTO.admin.RestaurantListResponseDto;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
-import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.specification.RestaurantSpecification;
 import jakarta.persistence.EntityNotFoundException;

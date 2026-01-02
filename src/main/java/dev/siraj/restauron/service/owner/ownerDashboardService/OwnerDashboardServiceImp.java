@@ -1,23 +1,26 @@
 package dev.siraj.restauron.service.owner.ownerDashboardService;
 
+import dev.siraj.restauron.DTO.owner.customerSideUrl.RestaurantLinkDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSalesStatsDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSubscriptionDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.TopItemDTO;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.entity.enums.subscription.SubscriptionStatus;
-import dev.siraj.restauron.respository.employeeRepo.EmployeeRepository;
-import dev.siraj.restauron.respository.orderRepo.OrderRepository;
-import dev.siraj.restauron.respository.subscription.RestaurantSubscriptionRepository;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
+import dev.siraj.restauron.repository.employeeRepo.EmployeeRepository;
+import dev.siraj.restauron.repository.orderRepo.OrderRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.repository.subscription.RestaurantSubscriptionRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // Service implementation for OwnerDashboardService
 
@@ -36,6 +39,12 @@ public class OwnerDashboardServiceImp implements OwnerDashboardService {
 
     @Autowired
     private IdEncryptionService idEncryptionService;
+
+    @Autowired
+    private RestaurantRepository restaurantRepository;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     /**
      * Retrieves sales statistics for a given restaurant.
@@ -158,11 +167,40 @@ public class OwnerDashboardServiceImp implements OwnerDashboardService {
 
                     return dto;
                 }  )
-                .collect(Collectors.toList());
+                .toList();
 
         log.info("Recent orders for restaurant ID {}: {}", restaurantId, recentOrders);
 
         return recentOrders;
 
+    }
+
+    @Override
+    public RestaurantLinkDTO getRestaurantCustomerLink(String encryptedRestaurantId) {
+
+
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId); // Your existing method
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+
+        if(restaurant.getCustomerPageUrl() == null){
+
+            String encryptedId = idEncryptionService.encryptLongId(restaurant.getId());
+
+
+
+            String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "home";
+
+            restaurant.setCustomerPageUrl(customerUrl);
+
+            restaurant = restaurantRepository.save(restaurant);
+
+        }
+
+        return new RestaurantLinkDTO(
+                restaurant.getCustomerPageUrl(),
+                idEncryptionService.encryptLongId(restaurant.getId()),
+                restaurant.getName()
+        );
     }
 }

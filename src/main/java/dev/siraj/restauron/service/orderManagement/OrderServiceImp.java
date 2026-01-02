@@ -24,12 +24,12 @@ import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
 import dev.siraj.restauron.entity.users.Customer;
 
 // Repositories
-import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
-import dev.siraj.restauron.respository.menuManagement.menuItemRepo.MenuItemRepository;
-import dev.siraj.restauron.respository.orderRepo.OrderRepository;
-import dev.siraj.restauron.respository.restaurantManagementRepos.RestaurantTableRepository;
-import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
-import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.repository.customerRepo.CustomerRepository;
+import dev.siraj.restauron.repository.menuManagement.menuItemRepo.MenuItemRepository;
+import dev.siraj.restauron.repository.orderRepo.OrderRepository;
+import dev.siraj.restauron.repository.restaurantManagementRepos.RestaurantTableRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.repository.userRepo.UserRepository;
 
 // Services & Specifications
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
@@ -203,6 +203,12 @@ public class OrderServiceImp implements OrderService {
             OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
             order.setStatus(newStatus);
             Order updatedOrder = orderRepository.save(order);
+            // 🔔 Send WebSocket notification to customer
+            notificationService.sendOrderStatusUpdateToCustomer(
+                    updatedOrder.getId(),
+                    newStatus,
+                    updatedOrder.getBillNumber()
+            );
             notificationService.sendRefreshSignal(encryptedRestaurantId,"STATUS_UPDATE");
 
             if(newStatus == OrderStatus.COMPLETED && order.getOrderType() == OrderType.DINE_IN){
@@ -331,7 +337,7 @@ public class OrderServiceImp implements OrderService {
         // Collect all menu item IDs
         List<Long> menuItemIds = items.stream()
                 .map(idExtractor)
-                .collect(Collectors.toList());
+                .toList();
 
         // Fetch all MenuItems in a single query
         Map<Long, MenuItem> menuItemMap = menuItemRepository.findAllById(menuItemIds).stream()
@@ -501,7 +507,7 @@ public class OrderServiceImp implements OrderService {
             itemDto.setPriceAtOrder(item.getPriceAtOrder());
             itemDto.setItemTotal(item.getPriceAtOrder() * item.getQuantity());
             return itemDto;
-        }).collect(Collectors.toList());
+        }).toList();
         dto.setItems(itemDtos);
 
         return dto;
@@ -534,7 +540,7 @@ public class OrderServiceImp implements OrderService {
             itemDto.setQuantity(item.getQuantity());
             itemDto.setPriceAtOrder(item.getPriceAtOrder());
             return itemDto;
-        }).collect(Collectors.toList());
+        }).toList();
 
         dto.setItems(itemResponses);
 

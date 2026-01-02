@@ -3,7 +3,7 @@ package dev.siraj.restauron.service.employee.employeeTableService;
 import dev.siraj.restauron.DTO.restaurant.restaurantTable.RestaurantTableDTO;
 import dev.siraj.restauron.entity.enums.table.TableStatus;
 import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
-import dev.siraj.restauron.respository.restaurantManagementRepos.RestaurantTableRepository;
+import dev.siraj.restauron.repository.restaurantManagementRepos.RestaurantTableRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

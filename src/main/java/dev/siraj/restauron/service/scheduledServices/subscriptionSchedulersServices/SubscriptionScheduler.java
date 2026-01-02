@@ -4,8 +4,8 @@ package dev.siraj.restauron.service.scheduledServices.subscriptionSchedulersServ
 import dev.siraj.restauron.entity.subscription.RestaurantSubscription;
 import dev.siraj.restauron.entity.enums.subscription.SubscriptionStatus;
 import dev.siraj.restauron.entity.subscription.SubscriptionPackage;
-import dev.siraj.restauron.respository.subscription.RestaurantSubscriptionRepository;
-import dev.siraj.restauron.respository.subscription.SubscriptionPackageRepository;
+import dev.siraj.restauron.repository.subscription.RestaurantSubscriptionRepository;
+import dev.siraj.restauron.repository.subscription.SubscriptionPackageRepository;
 import dev.siraj.restauron.service.registrarion.emailService.emailInterface.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,7 +5,7 @@ import dev.siraj.restauron.DTO.owner.RestaurantReduxSettingDto;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Owner;
 import dev.siraj.restauron.entity.users.UserAll;
-import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerService;
 import dev.siraj.restauron.service.restaurantService.restaurantServiceInterface.RestaurantService;

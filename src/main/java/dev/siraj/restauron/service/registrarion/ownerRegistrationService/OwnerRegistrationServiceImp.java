@@ -4,7 +4,7 @@ import dev.siraj.restauron.entity.restaurant.RestaurantRegistration;
 import dev.siraj.restauron.entity.users.Owner;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.mapping.owner.OwnerUserMapping;
-import dev.siraj.restauron.respository.ownerRepo.OwnerRepository;
+import dev.siraj.restauron.repository.ownerRepo.OwnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -8,7 +8,7 @@ import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Employee;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.mapping.employee.EmployeeMapping;
-import dev.siraj.restauron.respository.employeeRepo.EmployeeRepository;
+import dev.siraj.restauron.repository.employeeRepo.EmployeeRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.userService.UserServiceInterface.UserService;
 import jakarta.persistence.EntityNotFoundException;

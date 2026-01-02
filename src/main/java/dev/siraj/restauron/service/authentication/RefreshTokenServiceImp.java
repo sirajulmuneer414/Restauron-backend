@@ -2,8 +2,8 @@ package dev.siraj.restauron.service.authentication;
 
 import dev.siraj.restauron.entity.authentication.RefreshToken;
 import dev.siraj.restauron.entity.users.UserAll;
-import dev.siraj.restauron.respository.authentication.RefreshTokenRepository;
-import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.repository.authentication.RefreshTokenRepository;
+import dev.siraj.restauron.repository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

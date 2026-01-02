@@ -1,5 +1,6 @@
 package dev.siraj.restauron.restController.owner;
 
+import dev.siraj.restauron.DTO.owner.customerSideUrl.RestaurantLinkDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSalesStatsDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSubscriptionDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.TopItemDTO;
@@ -97,4 +98,14 @@ public class OwnerDashboardController {
         long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
         return ResponseEntity.ok(ownerDashboardService.getTopSellingItems(restaurantId));
     }
+
+
+    @GetMapping("/restaurant/customer-link")
+    public ResponseEntity<RestaurantLinkDTO> getRestaurantCustomerLink(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId
+    ) {
+        RestaurantLinkDTO linkDTO = ownerDashboardService.getRestaurantCustomerLink(encryptedRestaurantId);
+        return ResponseEntity.ok(linkDTO);
+    }
+
 }

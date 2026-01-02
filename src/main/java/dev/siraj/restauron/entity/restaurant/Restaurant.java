@@ -51,6 +51,9 @@ public class Restaurant {
 
     private LocalDate createdAt = LocalDate.now();
 
+    // ✨ NEW: Customer landing page URL
+    @Column(name = "customer_page_url", length = 500)
+    private String customerPageUrl;
 
     // --- Helper methods for bidirectional relationship ---
     // These are good practice for keeping both sides of the relationship in sync

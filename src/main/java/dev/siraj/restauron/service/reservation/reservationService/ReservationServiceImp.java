@@ -4,7 +4,7 @@ import dev.siraj.restauron.DTO.reservations.ReservationDto;
 import dev.siraj.restauron.entity.enums.ReservationStatus;
 import dev.siraj.restauron.entity.restaurant.management.reservation.Reservation;
 import dev.siraj.restauron.entity.restaurant.management.reservation.ReservationStatusTimestamp;
-import dev.siraj.restauron.respository.reservation.reservationRepo.ReservationRepository;
+import dev.siraj.restauron.repository.reservation.reservationRepo.ReservationRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

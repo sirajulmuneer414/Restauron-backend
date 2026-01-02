@@ -1,6 +1,6 @@
 package dev.siraj.restauron.service.scheduledServices.reservationScheduleServices;
 
-import dev.siraj.restauron.respository.reservation.reservationAvailability.dailyOverrideRepo.DailyOverrideRepository;
+import dev.siraj.restauron.repository.reservation.reservationAvailability.dailyOverrideRepo.DailyOverrideRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

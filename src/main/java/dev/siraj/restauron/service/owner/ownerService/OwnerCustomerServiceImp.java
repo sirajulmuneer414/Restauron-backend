@@ -14,11 +14,11 @@ import dev.siraj.restauron.entity.enums.RequestStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Customer;
 import dev.siraj.restauron.entity.users.UserAll;
-import dev.siraj.restauron.respository.blockAndUnblockRepo.CustomerBlockRepository;
-import dev.siraj.restauron.respository.blockAndUnblockRepo.CustomerUnblockRequestRepository;
-import dev.siraj.restauron.respository.customerRepo.CustomerRepository;
-import dev.siraj.restauron.respository.restaurantRepo.RestaurantRepository;
-import dev.siraj.restauron.respository.userRepo.UserRepository;
+import dev.siraj.restauron.repository.blockAndUnblockRepo.CustomerBlockRepository;
+import dev.siraj.restauron.repository.blockAndUnblockRepo.CustomerUnblockRequestRepository;
+import dev.siraj.restauron.repository.customerRepo.CustomerRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.repository.userRepo.UserRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerCustomerService;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,7 +37,6 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service

@@ -6,7 +6,7 @@ import dev.siraj.restauron.DTO.owner.orderManagement.OrderSummaryDto;
 import dev.siraj.restauron.DTO.restaurant.restaurantTable.RestaurantTableDTO;
 import dev.siraj.restauron.entity.enums.OrderStatus;
 import dev.siraj.restauron.entity.orderManagement.Order;
-import dev.siraj.restauron.respository.orderRepo.OrderRepository;
+import dev.siraj.restauron.repository.orderRepo.OrderRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
