@@ -64,8 +64,7 @@ public class RestaurantServiceImp implements RestaurantService {
     @Override
     public PublicViewRestaurantDto getPublicRestaurantDetailsUsingEncryptedId(String encryptedId) {
 
-      //  Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
-        Long restaurantId = Long.parseLong(encryptedId);  // Temporarily till setting up encryptedIds
+       Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         log.info("Decrypted public request for restaurant ID: {}", restaurantId);
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)

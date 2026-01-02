@@ -39,7 +39,7 @@ public class RestaurantRegistrationServiceImp implements RestaurantRegistrationS
 
         String encryptedId = idEncryptionService.encryptLongId(savedRestaurant.getId());
 
-        String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "home";
+        String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "/home";
 
         savedRestaurant.setCustomerPageUrl(customerUrl);
 

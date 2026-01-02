@@ -189,11 +189,13 @@ public class OwnerDashboardServiceImp implements OwnerDashboardService {
 
 
 
-            String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "/home";
+            if(restaurant.getCustomerPageUrl() == null) {
+                String customerUrl = frontendUrl + "/restaurant/" + encryptedId + "/home";
 
-            restaurant.setCustomerPageUrl(customerUrl);
+                restaurant.setCustomerPageUrl(customerUrl);
 
-            restaurant = restaurantRepository.save(restaurant);
+                restaurant = restaurantRepository.save(restaurant);
+            }
 
 
 
