@@ -101,7 +101,7 @@ public class MenuItemController {
             log.info("updated menu item successfully");
             return new ResponseEntity<>("Menu item updated successfully.", HttpStatus.OK);
         }
-
+        // toggle availability
         /**
          * Toggles the availability of a menu item.
          */
