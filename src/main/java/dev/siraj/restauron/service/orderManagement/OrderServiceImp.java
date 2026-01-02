@@ -520,7 +520,6 @@ public class OrderServiceImp implements OrderService {
         OrderResponse dto = new OrderResponse();
         dto.setBillNumber(order.getBillNumber());
         dto.setRestaurantName(order.getRestaurant().getName());
-        // Assuming Customer has a 'name' field, not 'user.name' as in your original code
         dto.setCustomerName(order.getCustomer().getUser().getName());
         dto.setTotalAmount(order.getTotalAmount());
         dto.setStatus(order.getStatus());
@@ -531,8 +530,15 @@ public class OrderServiceImp implements OrderService {
         dto.setOrderTime(order.getOrderTime());
         dto.setScheduledDate(order.getScheduledDate());
         dto.setScheduledTime(order.getScheduledTime());
-        dto.setRestaurantTableName(order.getRestaurantTable().getName());
-        dto.setRestaurantTableId(order.getRestaurantTable().getId());
+
+
+        if (order.getRestaurantTable() != null) {
+            dto.setRestaurantTableName(order.getRestaurantTable().getName());
+            dto.setRestaurantTableId(order.getRestaurantTable().getId());
+        } else {
+            dto.setRestaurantTableName(null); // or "N/A" or "No Table"
+            dto.setRestaurantTableId(null);
+        }
 
         List<OrderItemResponse> itemResponses = order.getItems().stream().map(item -> {
             OrderItemResponse itemDto = new OrderItemResponse();
@@ -546,6 +552,7 @@ public class OrderServiceImp implements OrderService {
 
         return dto;
     }
+
 
     /**
      * Sends a real-time order alert via WebSocket to the restaurant staff.
