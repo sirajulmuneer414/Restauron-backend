@@ -1,5 +1,6 @@
 package dev.siraj.restauron.entity.restaurant;
 
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.users.Employee;
 import dev.siraj.restauron.entity.users.Owner;
@@ -54,6 +55,15 @@ public class Restaurant {
     // ✨ NEW: Customer landing page URL
     @Column(name = "customer_page_url", length = 500)
     private String customerPageUrl;
+
+
+    // ✨ NEW: Access Level
+    @Enumerated(EnumType.STRING)
+    private AccessLevelStatus accessLevel;
+
+    private String customerPageMessage; // Message to display on customer page if access is restricted
+
+    private LocalDate subscriptionExpiredSince;
 
     // --- Helper methods for bidirectional relationship ---
     // These are good practice for keeping both sides of the relationship in sync

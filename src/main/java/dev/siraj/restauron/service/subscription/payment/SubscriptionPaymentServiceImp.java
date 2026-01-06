@@ -8,6 +8,7 @@ import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentHistoryDTO;
 import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentInitiateDTO;
 import dev.siraj.restauron.DTO.subscription.SubscriptionPaymentVerifyDTO;
 import dev.siraj.restauron.config.payment.razorpay.RazorpayConfig;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.subscription.SubscriptionStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.subscription.RestaurantSubscription;
@@ -157,6 +158,12 @@ public class SubscriptionPaymentServiceImp implements SubscriptionPaymentService
         payment.setStatus("SUCCESS");
 
         paymentRepository.save(payment);
+
+        restaurant.setAccessLevel(AccessLevelStatus.FULL);
+        restaurant.setCustomerPageMessage(null);
+        restaurant.setSubscriptionExpiredSince(null);
+
+        restaurantRepository.save(restaurant);
 
         // 4. Create/Update Subscription
         // Disable old active subscription if any

@@ -1,6 +1,7 @@
 package dev.siraj.restauron.exceptionHandlers;
 
 import com.razorpay.RazorpayException;
+import dev.siraj.restauron.exceptionHandlers.customExceptions.ServiceNotAvailableException;
 import dev.siraj.restauron.exceptionHandlers.errorResponseDto.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,20 @@ public class GlobalExceptionHandler {
         log.error("Razorpay exception: {}", e.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+
+    /** Handle ServiceNotAvailableException globally.
+     *
+     * @param e the ServiceNotAvailableException
+     * @return ResponseEntity with error message and HTTP status 503
+     */
+    @ExceptionHandler(ServiceNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> serviceNotAvailableExceptionHandler(ServiceNotAvailableException e){
+        ErrorResponse errorResponse = new ErrorResponse("Service Not Available", e.getCustomerLandingPageMessage());
+        log.error("Service not available exception: {}", e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
 
     /** Handle general Exception globally.
      *

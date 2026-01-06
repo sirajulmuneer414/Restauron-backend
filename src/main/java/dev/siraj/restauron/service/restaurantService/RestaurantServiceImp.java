@@ -2,9 +2,11 @@ package dev.siraj.restauron.service.restaurantService;
 
 import dev.siraj.restauron.DTO.customer.PublicViewRestaurantDto;
 import dev.siraj.restauron.DTO.owner.RestaurantReduxSettingDto;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.Owner;
 import dev.siraj.restauron.entity.users.UserAll;
+import dev.siraj.restauron.exceptionHandlers.customExceptions.ServiceNotAvailableException;
 import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerService;
@@ -69,6 +71,11 @@ public class RestaurantServiceImp implements RestaurantService {
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with ID: " + restaurantId));
+
+        if(AccessLevelStatus.BLOCKED.equals(restaurant.getAccessLevel())){
+            log.warn("Attempt to access blocked restaurant with ID: {}", restaurantId);
+            throw new ServiceNotAvailableException("Restaurant not found with ID: " + restaurantId, restaurant.getCustomerPageMessage());
+        }
 
         PublicViewRestaurantDto dto = new PublicViewRestaurantDto();
         dto.setName(restaurant.getName());

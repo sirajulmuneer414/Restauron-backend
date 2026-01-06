@@ -1,5 +1,6 @@
 package dev.siraj.restauron.config;
 
+import dev.siraj.restauron.config.filters.SubscriptionAccessFilter;
 import dev.siraj.restauron.config.jwt.JwtAuthFilter;
 import dev.siraj.restauron.service.authentication.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,11 +37,14 @@ public class SecurityConfig {
 
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final SubscriptionAccessFilter subscriptionAccessFilter;
+
     public HttpServletRequest request;
 
 
     @Autowired
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService, SubscriptionAccessFilter subscriptionAccessFilter) {
+        this.subscriptionAccessFilter = subscriptionAccessFilter;
         this.customUserDetailsService = customUserDetailsService;
     }
 
@@ -59,6 +63,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(subscriptionAccessFilter, JwtAuthFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
     }

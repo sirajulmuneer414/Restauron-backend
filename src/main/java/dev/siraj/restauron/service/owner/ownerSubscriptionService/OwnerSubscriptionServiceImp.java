@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class OwnerSubscriptionServiceImp implements OwnerSubscriptionService{
@@ -46,7 +45,7 @@ public class OwnerSubscriptionServiceImp implements OwnerSubscriptionService{
 
         List<SubscriptionPaymentDTO> paymentDTOs = payments.stream()
                 .map(this::mapToPaymentDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return new OwnerSubscriptionHomeDTO(currentSubscriptionDTO, paymentDTOs);
 
