@@ -29,6 +29,7 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
 
     // Paths that should always be allowed (e.g., Subscription Payment/Renewal endpoints)
     private static final List<String> WHITELISTED_PATHS = Arrays.asList(
+            "/api/auth/*",
             "/api/owner/payments",
             "/api/subscription/plans"
     );
@@ -40,61 +41,73 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // 1. Skip checks for Public APIs, Auth, or Whitelisted Payment paths
-        // (Public customer page blocking is better handled in the specific controller to avoid ID parsing issues here)
-        if (path.startsWith("/api/public") || path.startsWith("/api/auth") || isWhitelisted(path)) {
+        if (shouldSkip(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Check for X-Restaurant-Id Header (Standard for Dashboard requests)
         String encryptedRestaurantId = request.getHeader("X-Restaurant-Id");
+        if (encryptedRestaurantId == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        if (encryptedRestaurantId != null) {
-            try {
-                Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
-                Restaurant restaurant = restaurantRepository.findById(restaurantId).orElse(null);
+        try {
+            Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+            Restaurant restaurant = restaurantRepository.findById(restaurantId).orElse(null);
 
-                if (restaurant != null) {
-                    AccessLevelStatus accessLevel = restaurant.getAccessLevel();
-
-                    // --- ENFORCEMENT LOGIC ---
-
-                    // CASE 1: BLOCKED (Day 12+)
-                    // Complete lockout except for payment routes (handled in whitelist above)
-                    if (AccessLevelStatus.BLOCKED.equals(accessLevel)) {
-                        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE); // 503
-                        response.setContentType("application/json");
-                        response.getWriter().write("{\"error\": \"Service Suspended\", \"message\": \"" +
-                                (restaurant.getCustomerPageMessage() != null ? restaurant.getCustomerPageMessage() : "Contact Support") + "\"}");
-                        return; // Stop request
-                    }
-
-                    // CASE 2: READ_ONLY (Day 2 - 11)
-                    // Block state-changing methods (POST, PUT, DELETE, PATCH)
-                    // Allow GET and OPTIONS
-                    if (AccessLevelStatus.READ_ONLY.equals(accessLevel)) {
-                        if (isWriteMethod(method)) {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Read-Only Mode\", \"message\": \"Subscription expired. Renew to perform this action.\"}");
-                            return; // Stop request
-                        }
-                    }
-
-                    // CASE 3: PARTIAL / GRACE_PERIOD (Day 1)
-                    // Usually allows full access, but you can add a warning header if needed
-                    if (AccessLevelStatus.PARTIAL.equals(accessLevel)) {
-                        response.setHeader("X-Subscription-Warning", "Subscription in Grace Period");
-                    }
-                }
-            } catch (Exception e) {
-                // If ID decryption fails, we ignore it here and let the Controller handle the Bad Request
-                log.warn("Failed to process subscription check for header: {}", encryptedRestaurantId);
+            if (restaurant == null) {
+                filterChain.doFilter(request, response);
+                return;
             }
+
+            boolean handled = handleAccess(restaurant, response, method);
+            if (handled) {
+                return; // response already set (blocked/read-only)
+            }
+        } catch (Exception e) {
+            // If ID decryption or DB lookup fails, ignore here and let Controller handle the Bad Request
+            log.warn("Failed to process subscription check for header: {}", encryptedRestaurantId);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean shouldSkip(String path) {
+        return path.startsWith("/api/public") || path.startsWith("/api/auth") || isWhitelisted(path);
+    }
+
+    private boolean handleAccess(Restaurant restaurant, HttpServletResponse response, String method) throws IOException {
+        AccessLevelStatus accessLevel = restaurant.getAccessLevel();
+
+        if (AccessLevelStatus.BLOCKED.equals(accessLevel)) {
+            writeBlockedResponse(response, restaurant);
+            return true;
+        }
+
+        if (AccessLevelStatus.READ_ONLY.equals(accessLevel) && isWriteMethod(method)) {
+            writeReadOnlyResponse(response);
+            return true;
+        }
+
+        if (AccessLevelStatus.PARTIAL.equals(accessLevel)) {
+            response.setHeader("X-Subscription-Warning", "Subscription in Grace Period");
+        }
+
+        return false;
+    }
+
+    private void writeBlockedResponse(HttpServletResponse response, Restaurant restaurant) throws IOException {
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE); // 503
+        response.setContentType("application/json");
+        String message = restaurant.getCustomerPageMessage() != null ? restaurant.getCustomerPageMessage() : "Contact Support";
+        response.getWriter().write("{\"error\": \"Service Suspended\", \"message\": \"" + message + "\"}");
+    }
+
+    private void writeReadOnlyResponse(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"Read-Only Mode\", \"message\": \"Subscription expired. Renew to perform this action.\"}");
     }
 
     private boolean isWhitelisted(String path) {
