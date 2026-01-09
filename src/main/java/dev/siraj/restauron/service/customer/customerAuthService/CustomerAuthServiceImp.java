@@ -10,6 +10,7 @@ import dev.siraj.restauron.DTO.customer.auth.GoogleLoginRequestDto;
 import dev.siraj.restauron.DTO.customer.auth.LoginRequestDto;
 import dev.siraj.restauron.DTO.customer.auth.RegisterRequestDto;
 import dev.siraj.restauron.entity.authentication.RefreshToken;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.entity.enums.Roles;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
@@ -84,7 +85,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
         log.info("saved customer to database, name ; {}",customer.getUser().getName());
 
-        return jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(),savedUser.getId());
+        return jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(),savedUser.getId(),restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
 
 
     }
@@ -105,7 +106,9 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(), user.getId());
+        Restaurant restaurant = restaurantRepository.findById(customerRepository.findByUser(user).getRestaurant().getId()).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for customer"));
+
+        String token = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(), user.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
 
         AuthResponseDto dto = new AuthResponseDto();
 
@@ -165,9 +168,11 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
                 customerId = customer.getId();
             }
 
+            Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for Id : "+restaurantId));
+
             log.info("Verified for user : {}, email : {}", user.getName(), user.getEmail());
 
-            String token =  jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId());
+            String token =  jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
             AuthResponseDto authResponseDto = new AuthResponseDto(token, refreshToken);
@@ -228,7 +233,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
         customer.setRestaurant(restaurant);
         Customer savedCustomer = customerRepository.save(customer);
 
-        String token = jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(), savedUser.getId());
+        String token = jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(), savedUser.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
 
         AuthResponseDto dto = new AuthResponseDto();
         dto.setToken(token);

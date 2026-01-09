@@ -1,6 +1,7 @@
 package dev.siraj.restauron.service.authentication;
 
 
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.repository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
@@ -57,16 +58,16 @@ public class JwtServiceImp implements JwtService {
             String role,
             String username,
             String name,
-            Long userId
-    ) {
-        return buildToken(role, username, name, userId);
+            Long userId, AccessLevelStatus accessLevelStatus) {
+        return buildToken(role, username, name, userId, accessLevelStatus);
 
     }
 
     private String buildToken( String role,
                                String username,
                                String name,
-                               Long userId
+                               Long userId,
+                                 AccessLevelStatus accessLevelStatus
     ){
 
         UserAll user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -78,6 +79,7 @@ public class JwtServiceImp implements JwtService {
                 .claim("username",name)
                 .claim("email",username)
                 .claim("status",user.getStatus())
+                .claim("accessLevelStatus", accessLevelStatus != null ? accessLevelStatus.name() : null)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS256, getSigningKey())

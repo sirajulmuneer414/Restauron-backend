@@ -6,9 +6,12 @@ import dev.siraj.restauron.DTO.authentication.JwtAuthResponse;
 import dev.siraj.restauron.DTO.authentication.RefreshTokenRequestDto;
 import dev.siraj.restauron.entity.authentication.PasswordResetToken;
 import dev.siraj.restauron.entity.authentication.RefreshToken;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.Roles;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.repository.authentication.PasswordResetTokenRepository;
+import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.repository.userRepo.UserRepository;
 import dev.siraj.restauron.service.authentication.interfaces.JwtService;
 import dev.siraj.restauron.service.authentication.interfaces.RefreshTokenService;
@@ -56,6 +59,9 @@ public class AuthenticationService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private RestaurantRepository restaurantRepository;
+
 
     public JwtAuthResponse createResponseToken(EmailPasswordDto emailPasswordDto){
 
@@ -71,7 +77,21 @@ public class AuthenticationService {
 
         Roles role = user.getRole();
 
-        String jwtToken = jwtService.generateToken(role.name(),user.getEmail(), user.getName(), user.getId());
+        AccessLevelStatus accessLevelStatus = null;
+
+        if(role.equals(Roles.OWNER)){
+            Restaurant restaurant = restaurantRepository.findByOwner_User_Id(user.getId()).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for owner"));
+            if(restaurant.getAccessLevel() == null){
+                restaurant.setAccessLevel(AccessLevelStatus.FULL);
+                accessLevelStatus = AccessLevelStatus.FULL;
+                restaurantRepository.save(restaurant);
+            }
+            else {
+                accessLevelStatus = restaurant.getAccessLevel();
+            }
+        }
+
+        String jwtToken = jwtService.generateToken(role.name(),user.getEmail(), user.getName(), user.getId(), accessLevelStatus);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
         System.out.println("Reached till the return");
@@ -87,7 +107,9 @@ public class AuthenticationService {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String accessToken = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(),user.getId());
+                    Restaurant restaurant = restaurantRepository.findByOwner_User_Id(user.getId()).orElse(null);
+                    String accessToken = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(),user.getId(),
+                            restaurant != null ? restaurant.getAccessLevel() : null);
                     return new JwtAuthResponse(accessToken,requestDto.getOldRefreshToken());
                 }).orElseThrow(() -> new RuntimeException("Refresh token not found"));
 

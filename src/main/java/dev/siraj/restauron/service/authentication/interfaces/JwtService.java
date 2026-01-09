@@ -1,6 +1,7 @@
 package dev.siraj.restauron.service.authentication.interfaces;
 
 
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +17,8 @@ public interface JwtService {
             String role,
             String username,
             String name,
-            Long userId
+            Long userId,
+            AccessLevelStatus accessLevelStatus
     );
 
     public boolean isTokenValid(String token, UserDetails userDetails);
