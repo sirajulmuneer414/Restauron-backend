@@ -36,7 +36,7 @@ public class EmployeeServiceImp implements EmployeeService{
 
         UserAll user = userService.findUserById(userId);
 
-        Employee employee = employeeRepository.findByUser(user);
+        Employee employee = employeeRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException("Employee not found for user ID: "+userId));
 
         Restaurant restaurant = employee.getRestaurant();
 

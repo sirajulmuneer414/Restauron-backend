@@ -10,6 +10,7 @@ import dev.siraj.restauron.repository.employeeRepo.EmployeeRepository;
 import dev.siraj.restauron.repository.ownerRepo.OwnerRepository;
 import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -54,7 +55,7 @@ public class UserListMapping {
                     response.setRestaurantName(restaurantRepository.findByOwner(owner).getName());
                     break;
                 case "EMPLOYEE" :
-                    Employee employee = employeeRepository.findByUser(user);
+                    Employee employee = employeeRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException("Employee not found"));
                     response.setRestaurantName(employee.getRestaurant().getName());
                     break;
                 case "CUSTOMER" :

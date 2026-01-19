@@ -58,8 +58,10 @@ public class JwtServiceImp implements JwtService {
             String role,
             String username,
             String name,
-            Long userId, AccessLevelStatus accessLevelStatus) {
-        return buildToken(role, username, name, userId, accessLevelStatus);
+            Long userId,
+            AccessLevelStatus accessLevelStatus,
+            String restaurantName) {
+        return buildToken(role, username, name, userId, accessLevelStatus, restaurantName);
 
     }
 
@@ -67,7 +69,8 @@ public class JwtServiceImp implements JwtService {
                                String username,
                                String name,
                                Long userId,
-                                 AccessLevelStatus accessLevelStatus
+                               AccessLevelStatus accessLevelStatus,
+                               String restaurantName
     ){
 
         UserAll user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -80,6 +83,7 @@ public class JwtServiceImp implements JwtService {
                 .claim("email",username)
                 .claim("status",user.getStatus())
                 .claim("accessLevelStatus", accessLevelStatus != null ? accessLevelStatus.name() : null)
+                .claim("restaurantName", restaurantName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS256, getSigningKey())
@@ -109,8 +113,6 @@ public class JwtServiceImp implements JwtService {
 
 
     private byte[] getSigningKey() {
-        System.out.println("secret key : "+secret_key);
-        System.out.println("expiration : "+expiration);
         return Decoders.BASE64.decode(secret_key);
 
     }

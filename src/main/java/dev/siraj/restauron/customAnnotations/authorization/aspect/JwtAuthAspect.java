@@ -27,17 +27,13 @@ public class JwtAuthAspect {
     @Around("@within(dev.siraj.restauron.RolesAllowed) || @annotation(dev.siraj.restauron.RolesAllowed")
     public Object checkRole(ProceedingJoinPoint joinPoint) throws Throwable{
 
-        log.info("The process is at the authorization checker through RolesAllowed annotation");
-
         HttpServletRequest request = ((ServletRequestAttributes)Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 
 
         String authHeader = request.getHeader("Authorization");
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("The authorization token not found");
             throw new UnauthorizedException("Missing or Invalid Authorization");
-
         }
 
         String token = authHeader.substring(7);
@@ -67,7 +63,6 @@ public class JwtAuthAspect {
 
         }
 
-        log.info("The role is authorized");
         return joinPoint.proceed();
 
 
@@ -79,7 +74,7 @@ public class JwtAuthAspect {
 
         try {
             var method = jointPoint.getTarget().getClass()
-                    .getMethod(jointPoint.getSignature().getName(),((ProceedingJoinPoint)jointPoint).getArgs().getClass());
+                    .getMethod(jointPoint.getSignature().getName(),jointPoint.getArgs().getClass());
             if(method.isAnnotationPresent(RolesAllowed.class)){
                 return method.getAnnotation(RolesAllowed.class);
             }

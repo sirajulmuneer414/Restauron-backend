@@ -9,5 +9,6 @@ public class RestaurantListResponseDto {
     private String email;
     private String phone;
     private String ownerName;
-    private String status; // Assuming Restaurant has a status field (e.g., PENDING, APPROVED)
+    private String status;// Assuming Restaurant has a status field (e.g., PENDING, APPROVED)
+    private String accessLevel;
 }

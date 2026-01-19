@@ -85,7 +85,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
         log.info("saved customer to database, name ; {}",customer.getUser().getName());
 
-        return jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(),savedUser.getId(),restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
+        return jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(),savedUser.getId(),restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL, restaurant.getName());
 
 
     }
@@ -108,7 +108,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
         Restaurant restaurant = restaurantRepository.findById(customerRepository.findByUser(user).getRestaurant().getId()).orElseThrow(() -> new EntityNotFoundException("Restaurant not found for customer"));
 
-        String token = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(), user.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
+        String token = jwtService.generateToken(user.getRole().name(),user.getEmail(),user.getName(), user.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL, restaurant.getName());
 
         AuthResponseDto dto = new AuthResponseDto();
 
@@ -172,7 +172,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
 
             log.info("Verified for user : {}, email : {}", user.getName(), user.getEmail());
 
-            String token =  jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
+            String token =  jwtService.generateToken(user.getRole().name(), user.getEmail(), user.getName(), user.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL, restaurant.getName());
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
             AuthResponseDto authResponseDto = new AuthResponseDto(token, refreshToken);
@@ -233,7 +233,7 @@ public class CustomerAuthServiceImp implements CustomerAuthService{
         customer.setRestaurant(restaurant);
         Customer savedCustomer = customerRepository.save(customer);
 
-        String token = jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(), savedUser.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL);
+        String token = jwtService.generateToken(savedUser.getRole().name(), savedUser.getEmail(), savedUser.getName(), savedUser.getId(), restaurant.getAccessLevel() != null ? restaurant.getAccessLevel() : AccessLevelStatus.FULL, restaurant.getName());
 
         AuthResponseDto dto = new AuthResponseDto();
         dto.setToken(token);
