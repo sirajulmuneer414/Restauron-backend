@@ -1,7 +1,9 @@
 package dev.siraj.restauron.restController.owner;
 
 
+import dev.siraj.restauron.DTO.admin.RestaurantUpdateDto;
 import dev.siraj.restauron.DTO.owner.restaurantManagement.TableResponseDto;
+import dev.siraj.restauron.DTO.table.RestaurantTableRequestDTO;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
 import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerService;
 import dev.siraj.restauron.service.owner.ownerService.interfaces.OwnerTableService;
@@ -31,11 +33,11 @@ public class OwnerTableController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createTable(@RequestBody Map<String, String> payload, @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
+    public ResponseEntity<Void> createTable(@RequestBody RestaurantTableRequestDTO payload, @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
         log.info("inside the controller to create table");
         // Assuming your UserDetails implementation has a method to get the user ID
         Long ownerId = ownerService.getOwnerIdFromRestaurantEncryptedId(encryptedRestaurantId);
-        tableService.createTable(payload.get("name"), ownerId);
+        tableService.createTable(payload.name(), payload.capacity() , ownerId);
         return ResponseEntity.ok().build();
     }
 

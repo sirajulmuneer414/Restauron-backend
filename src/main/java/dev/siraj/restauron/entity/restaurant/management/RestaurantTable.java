@@ -19,6 +19,9 @@ public class RestaurantTable {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private Integer capacity = 4;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;

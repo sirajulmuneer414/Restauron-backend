@@ -29,11 +29,12 @@ public class OwnerTableServiceImp implements OwnerTableService {
     // to create restaurant table
     @Transactional
     @Override
-    public void createTable(String tableName, Long ownerUserId) {
+    public void createTable(String tableName, Integer capacity, Long ownerUserId) {
         Restaurant restaurant = restaurantRepository.findByOwner_User_Id(ownerUserId).orElseThrow(() -> new RuntimeException("Restaurant not found for owner"));
 
         RestaurantTable newTable = new RestaurantTable();
         newTable.setName(tableName);
+        newTable.setCapacity(capacity);
         newTable.setRestaurant(restaurant);
         tableRepository.save(newTable);
     }
@@ -51,6 +52,7 @@ public class OwnerTableServiceImp implements OwnerTableService {
             TableResponseDto dto = new TableResponseDto();
             dto.setEncryptedId(idEncryptionService.encryptLongId(item.getId()));
             dto.setTableId(item.getId());
+            dto.setCapacity(item.getCapacity());
             dto.setName(item.getName());
 
             log.info("{}. {}", dto.getEncryptedId(), dto.getName());

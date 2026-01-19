@@ -117,7 +117,8 @@ public class EmployeeOrderServiceImp implements EmployeeOrderService {
             dto.setRestaurantTable(new RestaurantTableDTO(
                     order.getRestaurantTable().getId(),
                     order.getRestaurantTable().getName(),
-                    order.getRestaurantTable().getStatus().name()
+                    order.getRestaurantTable().getStatus().name(),
+                    order.getRestaurantTable().getCapacity()
             ));
         }
 

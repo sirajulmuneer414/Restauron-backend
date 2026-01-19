@@ -167,6 +167,7 @@ public class OrderServiceImp implements OrderService {
             }
             order.setRestaurantTable(table);
             table.setStatus(TableStatus.OCCUPIED);
+            restaurantTableRepository.save(table);
         }
 
         // 2. Process items

@@ -59,6 +59,7 @@ public class EmployeeTableServiceImp implements EmployeeTableService {
         RestaurantTableDTO dto = new RestaurantTableDTO();
         dto.setTableId(table.getId());
         dto.setName(table.getName());
+        dto.setCapacity(table.getCapacity());
         dto.setStatus(table.getStatus().name());
         return dto;
     }
