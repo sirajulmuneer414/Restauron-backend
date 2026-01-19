@@ -13,6 +13,7 @@ public class RestaurantDetailsDto {
     private String state;
     private String pincode;
     private String status;
+    private String accessLevel;
 
     // Owner Information
     private String ownerName;

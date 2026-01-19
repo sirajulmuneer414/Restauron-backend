@@ -18,7 +18,8 @@ public interface JwtService {
             String username,
             String name,
             Long userId,
-            AccessLevelStatus accessLevelStatus
+            AccessLevelStatus accessLevelStatus,
+            String restaurantName
     );
 
     public boolean isTokenValid(String token, UserDetails userDetails);

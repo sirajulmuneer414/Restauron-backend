@@ -128,12 +128,12 @@ public class AdminServiceImp implements AdminService {
          }
 
          if(user.getRole() == Roles.EMPLOYEE) {
-             Employee employee = employeeRepository.findByUser(user);
+             Employee employee = employeeRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-             if(employee != null){
+
                  Restaurant restaurant = employee.getRestaurant();
                  dto.setRestaurantName(restaurant.getName());
-             }
+
          }
 
          if(user.getRole() == Roles.CUSTOMER){
