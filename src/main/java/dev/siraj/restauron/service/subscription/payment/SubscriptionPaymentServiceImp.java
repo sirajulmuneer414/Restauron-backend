@@ -80,7 +80,9 @@ public class SubscriptionPaymentServiceImp implements SubscriptionPaymentService
      *
      * @param packageId    ID of the subscription package
      * @param restaurantId ID of the restaurant
+     *
      * @return SubscriptionPaymentInitiateDTO containing order details
+     *
      * @throws RazorpayException if there is an error creating the order
      */
     @Override
