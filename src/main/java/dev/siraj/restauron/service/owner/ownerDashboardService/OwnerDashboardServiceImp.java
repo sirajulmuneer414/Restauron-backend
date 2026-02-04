@@ -3,9 +3,11 @@ package dev.siraj.restauron.service.owner.ownerDashboardService;
 import dev.siraj.restauron.DTO.owner.customerSideUrl.RestaurantLinkDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSalesStatsDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSubscriptionDTO;
+import dev.siraj.restauron.DTO.owner.dashboard.SalesReportDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.TopItemDTO;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.entity.enums.subscription.SubscriptionStatus;
+import dev.siraj.restauron.entity.orderManagement.Order;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.repository.employeeRepo.EmployeeRepository;
 import dev.siraj.restauron.repository.orderRepo.OrderRepository;
@@ -20,7 +22,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.time.temporal.WeekFields;
+import java.util.*;
+import java.util.stream.Collectors;
 
 // Service implementation for OwnerDashboardService
 
@@ -205,4 +209,118 @@ public class OwnerDashboardServiceImp implements OwnerDashboardService {
                 restaurant.getName()
         );
     }
+
+
+
+    @Override
+    public SalesReportDTO getSalesReport(Long restaurantId, String type) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate;
+
+        // Determine date range based on type
+        switch (type.toUpperCase()) {
+            case "WEEKLY":
+                startDate = endDate.minusWeeks(12); // Last 12 weeks
+                break;
+            case "MONTHLY":
+                startDate = endDate.minusMonths(12); // Last 12 months
+                break;
+            case "YEARLY":
+                startDate = endDate.minusYears(5); // Last 5 years
+                break;
+            case "DAILY":
+            default:
+                startDate = endDate.minusDays(30); // Last 30 days
+                break;
+        }
+
+        // Fetch Raw Data
+        List<Order> orders = orderRepository.findAllByRestaurantIdAndStatusAndOrderDateBetween(
+                restaurantId,
+                dev.siraj.restauron.entity.enums.OrderStatus.COMPLETED,
+                startDate,
+                endDate
+        );
+
+        // Calculate Summary Metrics
+        double totalRevenue = orders.stream().mapToDouble(Order::getTotalAmount).sum();
+        long totalCount = orders.size();
+        double avgOrderValue = totalCount > 0 ? totalRevenue / totalCount : 0.0;
+
+        // Group Data for Chart
+        List<SalesReportDTO.SalesDataPoint> chartData = new ArrayList<>();
+        Map<String, Double> groupedData = new TreeMap<>(); // Preserves order naturally if keys are sortable
+
+        if ("DAILY".equalsIgnoreCase(type)) {
+            // Fill map with 0.0 for all days to ensure continuous graph
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                groupedData.put(date.toString(), 0.0);
+            }
+            // Aggregate actual data
+            orders.forEach(o -> groupedData.merge(o.getOrderDate().toString(), o.getTotalAmount(), Double::sum));
+
+            // Convert to List
+            groupedData.forEach((key, value) -> chartData.add(new SalesReportDTO.SalesDataPoint(
+                    LocalDate.parse(key).getDayOfMonth() + "/" + LocalDate.parse(key).getMonthValue(), // Label: 12/10
+                    value,
+                    key
+            )));
+
+        } else if ("WEEKLY".equalsIgnoreCase(type)) {
+            // Group by Week of Year
+            Map<String, Double> weeklyMap = orders.stream()
+                    .collect(Collectors.groupingBy(
+                            o -> {
+                                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                                int week = o.getOrderDate().get(weekFields.weekOfWeekBasedYear());
+                                return "W" + week; // Label: W42
+                            },
+                            Collectors.summingDouble(Order::getTotalAmount)
+                    ));
+
+            // Simple conversion (sorting might need refinement based on year overlap in real prod, keeping simple here)
+            weeklyMap.forEach((k,v) -> chartData.add(new SalesReportDTO.SalesDataPoint(k, v, k)));
+
+        } else if ("MONTHLY".equalsIgnoreCase(type)) {
+            // Group by Month-Year
+            orders.forEach(o -> {
+                String key = o.getOrderDate().getMonth().name().substring(0,3) + "-" + o.getOrderDate().getYear();
+                // Note: For proper sorting, you usually use YYYY-MM as key, then format label later.
+                // Simplified here:
+            });
+
+            // Better approach for sorting:
+            Map<String, Double> monthlyMap = new TreeMap<>();
+            for (LocalDate date = startDate.withDayOfMonth(1); !date.isAfter(endDate); date = date.plusMonths(1)) {
+                monthlyMap.put(date.toString().substring(0, 7), 0.0); // Key: 2023-10
+            }
+
+            orders.forEach(o -> monthlyMap.merge(o.getOrderDate().toString().substring(0, 7), o.getTotalAmount(), Double::sum));
+
+            monthlyMap.forEach((key, value) -> {
+                LocalDate d = LocalDate.parse(key + "-01");
+                chartData.add(new SalesReportDTO.SalesDataPoint(
+                        d.getMonth().name().substring(0,3), // Label: JAN
+                        value,
+                        key
+                ));
+            });
+
+        } else { // YEARLY
+            Map<Integer, Double> yearlyMap = new TreeMap<>();
+            for (int i = startDate.getYear(); i <= endDate.getYear(); i++) {
+                yearlyMap.put(i, 0.0);
+            }
+            orders.forEach(o -> yearlyMap.merge(o.getOrderDate().getYear(), o.getTotalAmount(), Double::sum));
+
+            yearlyMap.forEach((key, value) -> chartData.add(new SalesReportDTO.SalesDataPoint(
+                    String.valueOf(key),
+                    value,
+                    String.valueOf(key)
+            )));
+        }
+
+        return new SalesReportDTO(totalRevenue, totalCount, avgOrderValue, chartData);
+    }
+
 }

@@ -3,6 +3,7 @@ package dev.siraj.restauron.restController.owner;
 import dev.siraj.restauron.DTO.owner.customerSideUrl.RestaurantLinkDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSalesStatsDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.OwnerDashboardSubscriptionDTO;
+import dev.siraj.restauron.DTO.owner.dashboard.SalesReportDTO;
 import dev.siraj.restauron.DTO.owner.dashboard.TopItemDTO;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
@@ -11,10 +12,7 @@ import dev.siraj.restauron.service.owner.ownerDashboardService.OwnerDashboardSer
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -106,6 +104,18 @@ public class OwnerDashboardController {
     ) {
         RestaurantLinkDTO linkDTO = ownerDashboardService.getRestaurantCustomerLink(encryptedRestaurantId);
         return ResponseEntity.ok(linkDTO);
+    }
+
+    /** Endpoint to get aggregated sales report.
+     * @param type The type of report (DAILY, WEEKLY, MONTHLY, YEARLY)
+     */
+    @GetMapping("/stats/report")
+    public ResponseEntity<SalesReportDTO> getSalesReport(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
+            @RequestParam(defaultValue = "DAILY") String type
+    ) {
+        long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+        return ResponseEntity.ok(ownerDashboardService.getSalesReport(restaurantId, type));
     }
 
 }

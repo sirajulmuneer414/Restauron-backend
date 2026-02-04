@@ -3,6 +3,7 @@ package dev.siraj.restauron.service.orderManagement.interfaces;
 import dev.siraj.restauron.DTO.customer.orders.OrderResponse;
 import dev.siraj.restauron.DTO.orders.CreateOrderRequest;
 import dev.siraj.restauron.DTO.orders.OrderPageRequestDto;
+import dev.siraj.restauron.DTO.owner.dashboard.SalesReportDTO;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderSummaryDto;
 import dev.siraj.restauron.DTO.common.orderManagement.OrderRequest;
@@ -26,4 +27,6 @@ public interface OrderService {
     void deleteOrder(String encryptedOrderId);
 
     OrderResponse createOrder(CreateOrderRequest request, String customerId);
+
+    // Add this method definition
 }
