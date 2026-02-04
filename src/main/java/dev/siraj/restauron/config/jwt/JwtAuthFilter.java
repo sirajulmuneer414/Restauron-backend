@@ -40,14 +40,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         if (request.getMethod().equals("OPTIONS")) {
-            log.info("Reached the filter for OPTIONS redirection");
             filterChain.doFilter(request, response); // Allow OPTIONS requests to pass through
             return;
         }
 
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.debug("No JWT token found in request headers");
             filterChain.doFilter(request, response);
             return;
         }
