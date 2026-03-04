@@ -1,6 +1,5 @@
 package dev.siraj.restauron.restController.owner;
 
-
 import dev.siraj.restauron.DTO.orders.OrderPageRequestDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderDetailDto;
 import dev.siraj.restauron.DTO.owner.orderManagement.OrderSummaryDto;
@@ -16,12 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/owner/orders")
-@RolesAllowed(roles = {"OWNER"}) // Assuming you have role-based security
+@RolesAllowed(roles = { "OWNER" }) // Assuming you have role-based security
 @Slf4j
 public class OwnerOrderController {
 
     private final OrderService orderService;
-
 
     @Autowired
     public OwnerOrderController(OrderService orderService) {
@@ -34,11 +32,8 @@ public class OwnerOrderController {
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @RequestBody OrderPageRequestDto pageable) {
 
-        log.info("Inside the controller to fetch lists of orders");
-        System.out.println(pageable.getSort());
-        System.out.println(pageable.getType());
-        System.out.println(pageable.getSearch());
-        System.out.println(pageable.getStatus());
+        log.info("Fetching orders list - Sort: {}, Type: {}, Search: {}, Status: {}",
+                pageable.getSort(), pageable.getType(), pageable.getSearch(), pageable.getStatus());
 
         Page<OrderSummaryDto> page = orderService.getAllOrdersForOwner(encryptedRestaurantId, pageable);
 
@@ -61,32 +56,26 @@ public class OwnerOrderController {
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @RequestBody OrderRequest request) {
 
-        log.info("Inside the controller to create order from owner side");
-        System.out.println(request.getTableId());
-        System.out.println(request.getOrderType());
-        System.out.println(request.getCustomerName());
-        System.out.println(request.getStatus());
-        System.out.println(request.getCustomerEncryptedId());
+        log.info(
+                "Creating manual order - TableId: {}, OrderType: {}, CustomerName: {}, Status: {}, CustomerId: {}, ItemCount: {}",
+                request.getTableId(), request.getOrderType(), request.getCustomerName(),
+                request.getStatus(), request.getCustomerEncryptedId(), request.getItems().size());
 
-        request.getItems().forEach(System.out::println);
-
-
-
-            OrderDetailDto dto = orderService.createManualOrder(encryptedRestaurantId, request);
+        OrderDetailDto dto = orderService.createManualOrder(encryptedRestaurantId, request);
 
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
     // PUT /owner/orders/{orderId}/status
     @PutMapping("/status/{orderId}")
-    public ResponseEntity<OrderDetailDto > updateOrderStatus(
+    public ResponseEntity<OrderDetailDto> updateOrderStatus(
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @PathVariable String orderId,
             @RequestParam("status") String orderStatus) {
 
         log.info("Inside the method to update order status for owner module");
 
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId,orderStatus, encryptedRestaurantId));
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, orderStatus, encryptedRestaurantId));
     }
 
     // DELETE /api/owner/orders/{orderId}
@@ -96,6 +85,3 @@ public class OwnerOrderController {
         return ResponseEntity.noContent().build();
     }
 }
-
-
-

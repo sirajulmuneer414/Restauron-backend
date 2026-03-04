@@ -78,11 +78,11 @@ public class OrderServiceImp implements OrderService {
 
     @Autowired
     public OrderServiceImp(OrderRepository orderRepository, CustomerRepository customerRepository,
-                           RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository,
-                           IdEncryptionService idEncryptionService,
-                           RestaurantTableRepository restaurantTableRepository,
-                           NotificationService notificationService,
-                           UserRepository userRepository) {
+            RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository,
+            IdEncryptionService idEncryptionService,
+            RestaurantTableRepository restaurantTableRepository,
+            NotificationService notificationService,
+            UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.restaurantRepository = restaurantRepository;
@@ -174,8 +174,7 @@ public class OrderServiceImp implements OrderService {
         Map<MenuItem, Integer> itemMap = processItems(
                 request.getItems(),
                 item -> idEncryptionService.decryptToLongId(item.getEncryptedId()),
-                OrderRequest.ItemRequest::getQuantity
-        );
+                OrderRequest.ItemRequest::getQuantity);
 
         // 3. Pass the order to the helper to set items, total, and bill number
         Order savedOrder = buildAndSaveOrder(order, itemMap);
@@ -208,20 +207,19 @@ public class OrderServiceImp implements OrderService {
             notificationService.sendOrderStatusUpdateToCustomer(
                     updatedOrder.getId(),
                     newStatus,
-                    updatedOrder.getBillNumber()
-            );
-            notificationService.sendRefreshSignal(encryptedRestaurantId,"STATUS_UPDATE");
+                    updatedOrder.getBillNumber());
+            notificationService.sendRefreshSignal(encryptedRestaurantId, "STATUS_UPDATE");
 
-            if(newStatus == OrderStatus.COMPLETED && order.getOrderType() == OrderType.DINE_IN){
+            if (newStatus == OrderStatus.COMPLETED && order.getOrderType() == OrderType.DINE_IN) {
                 RestaurantTable table = order.getRestaurantTable();
-                if(table != null){
+                if (table != null) {
                     table.setStatus(TableStatus.AVAILABLE);
                     restaurantTableRepository.save(table);
                 }
             }
-            if(newStatus == OrderStatus.CANCELLED && order.getOrderType() == OrderType.DINE_IN){
+            if (newStatus == OrderStatus.CANCELLED && order.getOrderType() == OrderType.DINE_IN) {
                 RestaurantTable table = order.getRestaurantTable();
-                if(table != null ){
+                if (table != null) {
                     table.setStatus(TableStatus.AVAILABLE);
                     restaurantTableRepository.save(table);
                 }
@@ -278,16 +276,12 @@ public class OrderServiceImp implements OrderService {
         Map<MenuItem, Integer> itemMap = processItems(
                 request.getItems(),
                 item -> idEncryptionService.decryptToLongId(item.getMenuItemEncryptedId()),
-                OrderItemRequest::getQuantity
-        );
+                OrderItemRequest::getQuantity);
 
         // 3. Pass the order to the helper to set items, total, and bill number
         Order savedOrder = buildAndSaveOrder(order, itemMap);
         return toOrderResponse(savedOrder);
     }
-
-
-
 
     //
     // --- PRIVATE HELPER & CONVERTER METHODS ---
@@ -313,27 +307,27 @@ public class OrderServiceImp implements OrderService {
             orderItem.setPriceAtOrder(menuItem.getPrice());
             orderItems.add(orderItem);
 
-
             totalAmount += menuItem.getPrice() * quantity;
         }
 
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
 
-        // --- Safe Bill Number Generation ---
-        order.setBillNumber("TEMP-" + java.util.UUID.randomUUID().toString()); // Set temporary
-        Order savedOrder = orderRepository.save(order); // Save to get ID
+        // Bill number is now handled by @PrePersist and @PostPersist in Order entity
+        // First save: triggers @PrePersist (sets TEMP-UUID), then @PostPersist (sets
+        // ORD-{id})
+        Order savedOrder = orderRepository.save(order);
 
-        savedOrder.setBillNumber("ORD-" + savedOrder.getId()); // Set real bill number
-        return orderRepository.save(savedOrder); // Save final
+        // Second save to persist the ORD-{id} bill number from @PostPersist
+        return orderRepository.save(savedOrder);
     }
 
     /**
      * A generic helper to process a list of any type of item request DTO.
      */
     private <T> Map<MenuItem, Integer> processItems(List<T> items,
-                                                    Function<T, Long> idExtractor,
-                                                    Function<T, Integer> quantityExtractor) {
+            Function<T, Long> idExtractor,
+            Function<T, Integer> quantityExtractor) {
         if (items == null || items.isEmpty()) {
             throw new BadCredentialsException("Order must contain at least one item.");
         }
@@ -357,8 +351,7 @@ public class OrderServiceImp implements OrderService {
                     }
                     return menuItem;
                 },
-                quantityExtractor
-        ));
+                quantityExtractor));
     }
 
     /**
@@ -384,59 +377,58 @@ public class OrderServiceImp implements OrderService {
     }
 
     /**
-     *  Specification Builder
+     * Specification Builder
+     * 
      * @param restaurantId
      * @param pageRequestDto
      * @return
      */
     private Specification<Order> buildSpecification(Long restaurantId, OrderPageRequestDto pageRequestDto) {
 
-
         return (root, query, criteriaBuilder) -> {
             // Root predicate - always filter by the owner's restaurant
             Predicate finalPredicate = criteriaBuilder.equal(root.get("restaurant").get("id"), restaurantId);
 
             // Adding status filter if provided and not "ALL"
-            if(StringUtils.hasText(pageRequestDto.getStatus())){
-                try{
-                    OrderStatus status =
-                            OrderStatus.valueOf(pageRequestDto.getStatus().toUpperCase());
+            if (StringUtils.hasText(pageRequestDto.getStatus())) {
+                try {
+                    OrderStatus status = OrderStatus.valueOf(pageRequestDto.getStatus().toUpperCase());
 
                     // Join with userAll to access status
-                    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(root.get("status"),status));
+                    finalPredicate = criteriaBuilder.and(finalPredicate,
+                            criteriaBuilder.equal(root.get("status"), status));
 
-                }catch (IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     log.warn("Invalid status filter provided: {}", pageRequestDto.getStatus());
 
                 }
             }
-            if(StringUtils.hasText(pageRequestDto.getType())){
-                try{
-                    OrderType status =
-                            OrderType.valueOf(pageRequestDto.getType().toUpperCase());
+            if (StringUtils.hasText(pageRequestDto.getType())) {
+                try {
+                    OrderType status = OrderType.valueOf(pageRequestDto.getType().toUpperCase());
 
+                    finalPredicate = criteriaBuilder.and(finalPredicate,
+                            criteriaBuilder.equal(root.get("orderType"), status));
 
-                    finalPredicate = criteriaBuilder.and(finalPredicate, criteriaBuilder.equal(root.get("orderType"),status));
-
-                }catch (IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     log.warn("Invalid type filter provided: {}", pageRequestDto.getType());
 
                 }
             }
 
             // adding searching filter if provided
-            if(StringUtils.hasText(pageRequestDto.getSearch())){
+            if (StringUtils.hasText(pageRequestDto.getSearch())) {
                 Join<Order, List<OrderItem>> itemsJoin = root.join("items");
                 Join<Order, Customer> customerJoin = root.join("customer");
 
-
-                String searchPattern = "%"+pageRequestDto.getSearch().toLowerCase()+"%";
+                String searchPattern = "%" + pageRequestDto.getSearch().toLowerCase() + "%";
 
                 Predicate searchPredicate = criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(customerJoin.get("user").get("name")), searchPattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(customerJoin.get("user").get("email")),searchPattern),
-                        criteriaBuilder.like(itemsJoin.get("menuItem").get("name"), searchPattern)
-                );
+                        criteriaBuilder.like(criteriaBuilder.lower(customerJoin.get("user").get("name")),
+                                searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(customerJoin.get("user").get("email")),
+                                searchPattern),
+                        criteriaBuilder.like(itemsJoin.get("menuItem").get("name"), searchPattern));
 
                 finalPredicate = criteriaBuilder.and(finalPredicate, searchPredicate);
             }
@@ -468,11 +460,7 @@ public class OrderServiceImp implements OrderService {
         dto.setOrderDate(
                 LocalDateTime.of(
                         order.getOrderDate(),
-                        order.getOrderTime() != null ? order.getOrderTime() : LocalTime.MIDNIGHT
-                )
-        );
-
-
+                        order.getOrderTime() != null ? order.getOrderTime() : LocalTime.MIDNIGHT));
 
         return dto;
     }
@@ -535,7 +523,6 @@ public class OrderServiceImp implements OrderService {
         dto.setScheduledDate(order.getScheduledDate());
         dto.setScheduledTime(order.getScheduledTime());
 
-
         if (order.getRestaurantTable() != null) {
             dto.setRestaurantTableName(order.getRestaurantTable().getName());
             dto.setRestaurantTableId(order.getRestaurantTable().getId());
@@ -556,7 +543,6 @@ public class OrderServiceImp implements OrderService {
 
         return dto;
     }
-
 
     /**
      * Sends a real-time order alert via WebSocket to the restaurant staff.

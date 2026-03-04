@@ -10,14 +10,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RestaurantRepository extends JpaRepository<Restaurant,Long>, JpaSpecificationExecutor<Restaurant> {
-
+public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, JpaSpecificationExecutor<Restaurant> {
 
     Restaurant findByOwner(Owner owner);
 
     Optional<Restaurant> findByOwner_User_Id(Long ownerUserId);
 
     Optional<Restaurant> findById(Long id);
+
+    Optional<Restaurant> findByName(String name);
 
     List<Restaurant> findTop5ByOrderByCreatedAtDesc();
 }

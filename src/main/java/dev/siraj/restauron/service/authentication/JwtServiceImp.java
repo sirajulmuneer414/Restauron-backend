@@ -1,6 +1,5 @@
 package dev.siraj.restauron.service.authentication;
 
-
 import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.users.UserAll;
 import dev.siraj.restauron.repository.userRepo.UserRepository;
@@ -37,7 +36,6 @@ public class JwtServiceImp implements JwtService {
 
     public String extractUsername(String token) {
 
-
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -45,6 +43,7 @@ public class JwtServiceImp implements JwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
+
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -52,7 +51,6 @@ public class JwtServiceImp implements JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
 
     public String generateToken(
             String role,
@@ -65,23 +63,22 @@ public class JwtServiceImp implements JwtService {
 
     }
 
-    private String buildToken( String role,
-                               String username,
-                               String name,
-                               Long userId,
-                               AccessLevelStatus accessLevelStatus,
-                               String restaurantName
-    ){
+    private String buildToken(String role,
+            String username,
+            String name,
+            Long userId,
+            AccessLevelStatus accessLevelStatus,
+            String restaurantName) {
 
         UserAll user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         return Jwts.builder()
-                .claim("role",role)
+                .claim("role", role)
                 .setSubject(username)
                 .claim("userId", idEncryptionService.encryptLongId(userId))
-                .claim("username",name)
-                .claim("email",username)
-                .claim("status",user.getStatus())
+                .claim("username", name)
+                .claim("email", username)
+                .claim("status", user.getStatus())
                 .claim("accessLevelStatus", accessLevelStatus != null ? accessLevelStatus.name() : null)
                 .claim("restaurantName", restaurantName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -97,8 +94,7 @@ public class JwtServiceImp implements JwtService {
 
     @Override
     public boolean isTokenValid(String token) {
-     return isTokenExpired(token);
-
+        return isTokenExpired(token);
 
     }
 
@@ -110,7 +106,6 @@ public class JwtServiceImp implements JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
 
     private byte[] getSigningKey() {
         return Decoders.BASE64.decode(secret_key);
@@ -130,5 +125,10 @@ public class JwtServiceImp implements JwtService {
     @Override
     public String extractUserRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    @Override
+    public String extractRestaurantName(String token) {
+        return extractClaim(token, claims -> claims.get("restaurantName", String.class));
     }
 }

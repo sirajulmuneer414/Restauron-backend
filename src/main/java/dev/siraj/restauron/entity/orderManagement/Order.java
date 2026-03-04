@@ -16,7 +16,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table( name = "restaurant_orders")
+@Table(name = "restaurant_orders")
 public class Order {
 
     @Id
@@ -79,4 +79,30 @@ public class Order {
     @CreationTimestamp
     @Column(nullable = false)
     private LocalTime orderTime;
+
+    /**
+     * JPA lifecycle callback to set temporary bill number before initial persist.
+     * This allows the entity to be saved without violating the NOT NULL constraint.
+     */
+    @PrePersist
+    public void prePersist() {
+        if (billNumber == null) {
+            billNumber = "TEMP-" + java.util.UUID.randomUUID().toString();
+        }
+    }
+
+    /**
+     * JPA lifecycle callback to set final bill number after persist.
+     * The ID is now available, so we can create the proper bill number format.
+     * Note: This requires a flush and refresh or a separate update query to persist
+     * the change.
+     */
+    @PostPersist
+    public void postPersist() {
+        // Note: This updates the in-memory object but doesn't automatically persist to
+        // DB
+        // The service layer should call repository.save() after this to persist the
+        // final bill number
+        this.billNumber = "ORD-" + this.id;
+    }
 }

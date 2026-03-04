@@ -1,6 +1,5 @@
 package dev.siraj.restauron.service.authentication.interfaces;
 
-
 import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.Authentication;
@@ -11,6 +10,7 @@ import java.util.function.Function;
 // jwt service interface  Class
 public interface JwtService {
     public String extractUsername(String token);
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 
     public String generateToken(
@@ -19,8 +19,7 @@ public interface JwtService {
             String name,
             Long userId,
             AccessLevelStatus accessLevelStatus,
-            String restaurantName
-    );
+            String restaurantName);
 
     public boolean isTokenValid(String token, UserDetails userDetails);
 
@@ -29,6 +28,6 @@ public interface JwtService {
     public String generateToken(Authentication authentication);
 
     String extractUserRole(String token);
+
+    String extractRestaurantName(String token);
 }
-
-

@@ -34,13 +34,6 @@ public class RestaurantServiceImp implements RestaurantService {
     private UserService userService;
 
     @Override
-    public Restaurant findRestaurantByRestaurantCode(String restaurantCode) {
-
-        return null;
-
-    }
-
-    @Override
     public Restaurant findRestaurantByOwner(Owner owner) {
         return restaurantRepository.findByOwner(owner);
     }
@@ -66,15 +59,16 @@ public class RestaurantServiceImp implements RestaurantService {
     @Override
     public PublicViewRestaurantDto getPublicRestaurantDetailsUsingEncryptedId(String encryptedId) {
 
-       Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         log.info("Decrypted public request for restaurant ID: {}", restaurantId);
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new EntityNotFoundException("Restaurant not found with ID: " + restaurantId));
 
-        if(AccessLevelStatus.BLOCKED.equals(restaurant.getAccessLevel())){
+        if (AccessLevelStatus.BLOCKED.equals(restaurant.getAccessLevel())) {
             log.warn("Attempt to access blocked restaurant with ID: {}", restaurantId);
-            throw new ServiceNotAvailableException("Restaurant not found with ID: " + restaurantId, restaurant.getCustomerPageMessage());
+            throw new ServiceNotAvailableException("Restaurant not found with ID: " + restaurantId,
+                    restaurant.getCustomerPageMessage());
         }
 
         PublicViewRestaurantDto dto = new PublicViewRestaurantDto();
@@ -94,6 +88,5 @@ public class RestaurantServiceImp implements RestaurantService {
 
         return restaurant.getPhone();
     }
-
 
 }

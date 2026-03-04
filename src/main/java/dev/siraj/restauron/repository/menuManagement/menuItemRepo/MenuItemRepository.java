@@ -3,6 +3,7 @@ package dev.siraj.restauron.repository.menuManagement.menuItemRepo;
 import dev.siraj.restauron.entity.enums.AvailabilityStatus;
 import dev.siraj.restauron.entity.menuManagement.Category;
 import dev.siraj.restauron.entity.menuManagement.MenuItem;
+import dev.siraj.restauron.entity.restaurant.Restaurant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MenuItemRepository extends JpaRepository<MenuItem, Long> , JpaSpecificationExecutor<MenuItem> {
+public interface MenuItemRepository extends JpaRepository<MenuItem, Long>, JpaSpecificationExecutor<MenuItem> {
     Page<MenuItem> findByRestaurantIdAndNameContainingIgnoreCase(Long restaurantId, String name, Pageable pageable);
 
     List<MenuItem> findByRestaurantIdAndNameContainingIgnoreCase(Long restaurantId, String name);
@@ -31,9 +32,20 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> , JpaS
 
     @Modifying
     @Query("UPDATE MenuItem m SET m.status = :newStatus, m.isAvailable = :isAvailable WHERE m.category.id = :categoryId")
-    int updateStatusAndAvailabilityByCategoryId(@Param("categoryId") Long categoryId, @Param("newStatus") AvailabilityStatus newStatus, @Param("isAvailable") boolean isAvailable);
+    int updateStatusAndAvailabilityByCategoryId(@Param("categoryId") Long categoryId,
+            @Param("newStatus") AvailabilityStatus newStatus, @Param("isAvailable") boolean isAvailable);
 
     Optional<List<MenuItem>> findByCategory(Category category);
 
     List<MenuItem> findByRestaurantId(Long restaurantId);
+
+    /**
+     * Find all available menu items for a restaurant (for public table ordering)
+     * 
+     * @param restaurant The restaurant
+     * @param status     Availability status (typically AVAILABLE)
+     * @return List of available menu items ordered by category name
+     */
+    List<MenuItem> findByRestaurantAndIsAvailableTrueAndStatusOrderByCategoryName(Restaurant restaurant,
+            AvailabilityStatus status);
 }

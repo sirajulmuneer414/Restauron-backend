@@ -3,6 +3,7 @@ package dev.siraj.restauron.config.filters;
 import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.repository.restaurantRepo.RestaurantRepository;
+import dev.siraj.restauron.service.authentication.interfaces.JwtService;
 import dev.siraj.restauron.service.encryption.idEncryption.IdEncryptionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,12 +28,15 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
     @Autowired
     private IdEncryptionService idEncryptionService;
 
-    // Paths that should always be allowed (e.g., Subscription Payment/Renewal endpoints)
+    @Autowired
+    private JwtService jwtService;
+
+    // Paths that should always be allowed (e.g., Subscription Payment/Renewal
+    // endpoints)
     private static final List<String> WHITELISTED_PATHS = Arrays.asList(
             "/api/auth/*",
             "/api/owner/payments",
-            "/api/subscription/plans"
-    );
+            "/api/subscription/plans");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -46,28 +50,42 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Try to get restaurant ID from header first (customer requests)
         String encryptedRestaurantId = request.getHeader("X-Restaurant-Id");
-        if (encryptedRestaurantId == null) {
+        Restaurant restaurant = null;
+
+        if (encryptedRestaurantId != null) {
+            // Customer request with explicit restaurant ID
+            try {
+                Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
+                restaurant = restaurantRepository.findById(restaurantId).orElse(null);
+            } catch (Exception e) {
+                log.warn("Failed to decrypt restaurant ID from header: {}", encryptedRestaurantId);
+            }
+        } else {
+            // Owner/Employee request - extract from JWT token
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    String restaurantName = jwtService.extractRestaurantName(token);
+                    if (restaurantName != null) {
+                        restaurant = restaurantRepository.findByName(restaurantName).orElse(null);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to extract restaurant from JWT token", e);
+                }
+            }
+        }
+
+        if (restaurant == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        try {
-            Long restaurantId = idEncryptionService.decryptToLongId(encryptedRestaurantId);
-            Restaurant restaurant = restaurantRepository.findById(restaurantId).orElse(null);
-
-            if (restaurant == null) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            boolean handled = handleAccess(restaurant, response, method);
-            if (handled) {
-                return; // response already set (blocked/read-only)
-            }
-        } catch (Exception e) {
-            // If ID decryption or DB lookup fails, ignore here and let Controller handle the Bad Request
-            log.warn("Failed to process subscription check for header: {}", encryptedRestaurantId);
+        boolean handled = handleAccess(restaurant, response, method);
+        if (handled) {
+            return; // response already set (blocked/read-only)
         }
 
         filterChain.doFilter(request, response);
@@ -77,7 +95,8 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
         return path.startsWith("/api/public") || path.startsWith("/api/auth") || isWhitelisted(path);
     }
 
-    private boolean handleAccess(Restaurant restaurant, HttpServletResponse response, String method) throws IOException {
+    private boolean handleAccess(Restaurant restaurant, HttpServletResponse response, String method)
+            throws IOException {
         AccessLevelStatus accessLevel = restaurant.getAccessLevel();
 
         if (AccessLevelStatus.BLOCKED.equals(accessLevel)) {
@@ -100,14 +119,16 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
     private void writeBlockedResponse(HttpServletResponse response, Restaurant restaurant) throws IOException {
         response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE); // 503
         response.setContentType("application/json");
-        String message = restaurant.getCustomerPageMessage() != null ? restaurant.getCustomerPageMessage() : "Contact Support";
+        String message = restaurant.getCustomerPageMessage() != null ? restaurant.getCustomerPageMessage()
+                : "Contact Support";
         response.getWriter().write("{\"error\": \"Service Suspended\", \"message\": \"" + message + "\"}");
     }
 
     private void writeReadOnlyResponse(HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"Read-Only Mode\", \"message\": \"Subscription expired. Renew to perform this action.\"}");
+        response.getWriter().write(
+                "{\"error\": \"Read-Only Mode\", \"message\": \"Subscription expired. Renew to perform this action.\"}");
     }
 
     private boolean isWhitelisted(String path) {
