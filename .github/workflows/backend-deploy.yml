@@ -2,8 +2,7 @@ name: Deploy Backend
 
 on:
   push:
-    branches: [ "main" ]
-    # No path filter needed if the whole repo is backend
+    branches: ["main"]
 
 jobs:
   build-and-deploy:
@@ -28,22 +27,68 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          # We are already in the root, so no 'cd' needed
           mvn clean package -DskipTests
-          
-          # Build Docker Image
           docker build -t ${{ secrets.DOCKER_USERNAME }}/restauron-backend:latest .
-          
-          # Push to Hub
           docker push ${{ secrets.DOCKER_USERNAME }}/restauron-backend:latest
 
-      - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v22
+      - name: Copy docker-compose to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: restauron-backend
-          environment_name: Restauron-backend-env
-          version_label: "ver-${{ github.run_number }}"
-          region: eu-north-1
-          deployment_package: Dockerrun.aws.json
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/restauron-backend/"
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # Pass all app secrets as environment variables into the SSH session
+          envs: DOCKER_USERNAME,MYSQL_PASSWORD,APPLICATION_SECURITY_JWT_SECRET_KEY,APPLICATION_SECURITY_JWT_EXPIRATION,APPLICATION_SECURITY_JWT_REFRESH-TOKEN_EXPIRATION,APP_FRONTEND_URL,APP_ENCRYPTION_KEY,APP_ENCRYPTION_ALGORITHM,APP_ADMIN_PASSWORD,CLOUDINARY_API_KEY,CLOUDINARY_API_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,RAZORPAY_SECRET,MAIL_PASSWORD,SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI
+          script: |
+            cd ~/restauron-backend
+
+            # Write a fresh .env from GitHub Secrets on every deploy
+            cat > .env << EOF
+            DOCKER_USERNAME=$DOCKER_USERNAME
+            MYSQL_PASSWORD=$MYSQL_ROOT_PASSWORD
+            APPLICATION_SECURITY_JWT_SECRET_KEY=$APPLICATION_SECURITY_JWT_SECRET_KEY
+            APPLICATION_SECURITY_JWT_REFRESH-TOKEN_EXPIRATION=$APPLICATION_SECURITY_JWT_REFRESH-TOKEN_EXPIRATION
+            APPLICATION_SECURITY_JWT_EXPIRATION=$APPLICATION_SECURITY_JWT_EXPIRATION
+            APP_FRONTEND_URL=$APP_FRONTEND_URL
+            APP_ENCRYPTION_KEY=$APP_ENCRYPTION_KEY
+            APP_ENCRYPTION_ALGORITHM=$APP_ENCRYPTION_ALGORITHM
+            APP_ADMIN_PASSWORD=$APP_ADMIN_PASSWORD
+            CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY
+            CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
+            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+            RAZORPAY_SECRET=$RAZORPAY_SECRET
+            MAIL_PASSWORD=$MAIL_PASSWORD
+            SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI=$SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI
+
+            EOF
+
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          RAZORPAY_SECRET: ${{ secrets.RAZORPAY_SECRET }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          APPLICATION_SECURITY_JWT_SECRET_KEY: ${{ secrets.JWT_SECRET }}
+          APPLICATION_SECURITY_JWT_REFRESH-TOKEN_EXPIRATION: ${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION }}
+          APPLICATION_SECURITY_JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          APP_FRONTEND_URL: ${{ secrets.APP_FRONTEND_URL }}
+          APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
+          APP_ENCRYPTION_ALGORITHM: ${{ secrets.APP_ENCRYPTION_ALGORITHM }}
+          APP_ADMIN_PASSWORD: ${{ secrets.APP_ADMIN_PASSWORD }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: ${{ secrets.SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI }}

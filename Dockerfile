@@ -29,5 +29,7 @@ COPY --from=build /app/target/*.jar app.jar
 # Expose the port your Spring Boot app runs on
 EXPOSE 8081
 
+ENV TZ=Asia/Kolkata
+
 # The command to start the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]

@@ -1,0 +1,72 @@
+# Production Docker Compose — EC2 Deployment
+# Backend (pulled from Docker Hub) + MySQL only.
+# Frontend is on Vercel — not included here.
+#
+# All ${...} values are read from a .env file in the SAME directory on the EC2 server.
+# Never commit the .env file to git.
+
+services:
+
+  # ---------- Database ----------
+  db:
+    image: mysql:8.0
+    container_name: restauron-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: restauron_db
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - restauron-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+  # ---------- Backend ----------
+  backend:
+    image: ${DOCKER_USERNAME}/restauron-backend:latest
+    container_name: restauron-backend-container
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      # Database
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/restauron_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      # JWT
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${APPLICATION_SECURITY_JWT_SECRET_KEY}
+      - APPLICATION_SECURITY_JWT_EXPIRATION=${APPLICATION_SECURITY_JWT_EXPIRATION}
+      - APPLICATION_SECURITY_JWT_REFRESH-TOKEN_EXPIRATION=${APPLICATION_SECURITY_JWT_REFRESH-TOKEN_EXPIRATION}
+      # App settings
+      - APP_FRONTEND_URL=${APP_FRONTEND_URL}
+      - APP_ENCRYPTION_KEY=${APP_ENCRYPTION_KEY}
+      - APP_ENCRYPTION_ALGORITHM=${APP_ENCRYPTION_ALGORITHM}
+      - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
+      # Cloudinary
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      # Google OAuth2
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI=${SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI}
+      # Razorpay
+      - RAZORPAY_SECRET=${RAZORPAY_SECRET}
+      # Mail
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+    volumes:
+      - ./logs:/restauron-backend/logs
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - restauron-network
+
+networks:
+  restauron-network:
+    driver: bridge
+
+volumes:
+  db_data:
