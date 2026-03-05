@@ -54,7 +54,7 @@ jobs:
             # Write a fresh .env from GitHub Secrets on every deploy
             cat > .env << EOF
             DOCKER_USERNAME=$DOCKER_USERNAME
-            MYSQL_PASSWORD=$MYSQL_ROOT_PASSWORD
+            MYSQL_PASSWORD=$MYSQL_PASSWORD
             APP_FRONTEND_URL=$APP_FRONTEND_URL
             APP_ENCRYPTION_KEY=$APP_ENCRYPTION_KEY
             APP_ENCRYPTION_ALGORITHM=$APP_ENCRYPTION_ALGORITHM
@@ -74,7 +74,7 @@ jobs:
             docker image prune -f
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
           RAZORPAY_SECRET: ${{ secrets.RAZORPAY_SECRET }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           APP_FRONTEND_URL: ${{ secrets.APP_FRONTEND_URL }}
