@@ -28,5 +28,6 @@ public class OrderRequest {
     public static class ItemRequest {
         private String encryptedId;
         private int quantity;
+        private String note;
     }
 }

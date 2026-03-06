@@ -8,9 +8,10 @@ import java.util.List;
 public interface OwnerTableService {
     void createTable(String tableName, Integer capacity, Long ownerUserId);
 
-
     List<TableResponseDto> getTablesForOwner(Long ownerUserId);
 
-
     void deleteTable(String encryptedTableId, Long ownerUserId) throws AccessDeniedException;
+
+    TableResponseDto updateTableStatus(String encryptedTableId, String status, Long ownerUserId)
+            throws AccessDeniedException;
 }

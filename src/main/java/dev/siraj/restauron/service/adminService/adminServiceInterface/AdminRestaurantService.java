@@ -4,6 +4,7 @@ import dev.siraj.restauron.DTO.admin.RestaurantDetailsDto;
 import dev.siraj.restauron.DTO.admin.RestaurantListResponseDto;
 import dev.siraj.restauron.DTO.admin.RestaurantUpdateDto;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import org.springframework.data.domain.Page;
 
@@ -15,6 +16,8 @@ public interface AdminRestaurantService {
     void updateRestaurant(String encryptedId, RestaurantUpdateDto dto);
 
     void updateRestaurantStatus(String encryptedId, AccountStatus newStatus);
+
+    void updateAccessLevel(String encryptedId, AccessLevelStatus newAccessLevel);
 
     void deleteRestaurant(String encryptedId);
 }

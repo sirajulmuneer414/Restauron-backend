@@ -112,7 +112,7 @@ public class EmailServiceImp implements EmailService {
         context.setVariable("restaurantName", restaurantName);
         context.setVariable("email", finalCompanyEmail);
         context.setVariable("password", generatedPassword);
-        context.setVariable("loginLink", "http://localhost:5713/login");
+        context.setVariable("loginLink", "https://restauron.vercel.app/login");
 
         String processHtml = templateEngine.process("employee-credentials", context);
 
@@ -146,7 +146,7 @@ public class EmailServiceImp implements EmailService {
 
         context.setVariable("RestauronName", restaurantName);
         context.setVariable("restaurantEmail", email);
-        context.setVariable("renewalLink", "http://localhost:5713/subscription/");
+        context.setVariable("renewalLink", "https://restauron.vercel.app/subscription/");
         String processHtml = templateEngine.process("subscription-expired", context);
 
         try {
@@ -178,7 +178,7 @@ public class EmailServiceImp implements EmailService {
         context.setVariable("RestauronName", restaurantName);
         context.setVariable("restaurantEmail", email);
         context.setVariable("daysLeft", daysLeft);
-        context.setVariable("renewalLink", "http://localhost:5713/subscription/");
+        context.setVariable("renewalLink", "https://restauron.verce.app/subscription/");
 
         String expiryDate = LocalDate.now().plusDays(daysLeft).format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"));
         context.setVariable("expiryDate", expiryDate);

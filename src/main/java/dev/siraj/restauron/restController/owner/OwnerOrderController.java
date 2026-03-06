@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/owner/orders")
 @RolesAllowed(roles = { "OWNER" }) // Assuming you have role-based security
@@ -80,8 +82,18 @@ public class OwnerOrderController {
 
     // DELETE /api/owner/orders/{orderId}
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable String encryptedOrderId) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable("orderId") String encryptedOrderId) {
         orderService.deleteOrder(encryptedOrderId);
         return ResponseEntity.noContent().build();
+    }
+
+    // PUT /api/owner/orders/{orderId}/items
+    @PutMapping("/{orderId}/items")
+    public ResponseEntity<OrderDetailDto> updateOrderItems(
+            @PathVariable("orderId") String encryptedOrderId,
+            @RequestBody List<OrderRequest.ItemRequest> items) {
+
+        log.info("Owner updating items for order {}", encryptedOrderId);
+        return ResponseEntity.ok(orderService.updateOrderItems(encryptedOrderId, items));
     }
 }

@@ -170,8 +170,10 @@ public class MenuItemServiceImp implements MenuItemService{
         menuItem.setName(request.getName());
         menuItem.setDescription(request.getDescription());
         menuItem.setPrice(request.getPrice());
+
+        System.out.println("Image file status in service: " + (request.getImageFile() != null ? "Present" : "Not Present"));
         if(request.getImageFile() != null){
-            if(!menuItem.getImageUrl().isEmpty()) imageUploadService.deleteImageByUrl(menuItem.getImageUrl());
+            if(menuItem.getImageUrl() != null) imageUploadService.deleteImageByUrl(menuItem.getImageUrl());
             String menuItemImage = imageUploadService.imageUploader(request.getImageFile(), "MenuItem-"+menuItem.getRestaurant().getId());
             menuItem.setImageUrl(menuItemImage);
         }

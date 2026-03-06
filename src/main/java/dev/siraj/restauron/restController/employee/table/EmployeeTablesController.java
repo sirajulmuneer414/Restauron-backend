@@ -1,8 +1,8 @@
 package dev.siraj.restauron.restController.employee.table;
 
+import dev.siraj.restauron.DTO.employee.table.TableDetailResponseDTO;
 import dev.siraj.restauron.DTO.restaurant.restaurantTable.RestaurantTableDTO;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
-import dev.siraj.restauron.entity.restaurant.management.RestaurantTable;
 import dev.siraj.restauron.service.employee.employeeTableService.EmployeeTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// Controller for Employee Table related endpoints
-
 @RestController
 @RequestMapping("/api/employee/tables")
-@RolesAllowed(roles = {"EMPLOYEE"})
+@RolesAllowed(roles = { "EMPLOYEE" })
 public class EmployeeTablesController {
 
     private final EmployeeTableService employeeTableService;
@@ -24,28 +22,26 @@ public class EmployeeTablesController {
         this.employeeTableService = employeeTableService;
     }
 
-    /**
-     * Endpoint to retrieve all tables for a restaurant.
-     *
-     * @param encryptedRestaurantId The encrypted ID of the restaurant from request header.
-     * @return ResponseEntity containing a list of RestaurantTable entities.
-     */
+    /** Get all tables for this restaurant */
     @GetMapping()
     public ResponseEntity<List<RestaurantTableDTO>> getAllTables(
-            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId
-    ) {
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
         return ResponseEntity.ok(employeeTableService.getAllTables(encryptedRestaurantId));
     }
 
+    /** Get a single table with its active orders */
+    @GetMapping("/{id}")
+    public ResponseEntity<TableDetailResponseDTO> getTableDetail(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(employeeTableService.getTableDetail(id, encryptedRestaurantId));
+    }
+
     /**
-     * Endpoint to update the status of a specific table.
-     *
-     * @param encryptedRestaurantId The encrypted ID of the restaurant from request header.
-     * @param id The ID of the table to be updated.
-     * @param statusDto The new status for the table.
-     * @return ResponseEntity containing the updated RestaurantTable entity.
+     * Update the status of a specific table — fixed path (was /tables/{id}/status →
+     * /{id}/status)
      */
-    @PutMapping("/tables/{id}/status")
+    @PutMapping("/{id}/status")
     public ResponseEntity<RestaurantTableDTO> updateTableStatus(
             @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId,
             @PathVariable Long id,
@@ -53,6 +49,4 @@ public class EmployeeTablesController {
 
         return ResponseEntity.ok(employeeTableService.updateTableStatus(id, statusDto, encryptedRestaurantId));
     }
-
-
 }

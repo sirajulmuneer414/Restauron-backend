@@ -4,6 +4,7 @@ import dev.siraj.restauron.DTO.admin.RestaurantDetailsDto;
 import dev.siraj.restauron.DTO.admin.RestaurantListResponseDto;
 import dev.siraj.restauron.DTO.admin.RestaurantUpdateDto;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.service.adminService.adminServiceInterface.AdminRestaurantService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/restaurants")
@@ -25,10 +28,13 @@ public class AdminRestaurantController {
     }
 
     @PostMapping("/fetch-list")
-    public ResponseEntity<Page<RestaurantListResponseDto>> fetchRestaurantList(@RequestBody PageRequestDto pageRequestDto) {
+    public ResponseEntity<Page<RestaurantListResponseDto>> fetchRestaurantList(
+            @RequestBody PageRequestDto pageRequestDto) {
 
-        log.info("Inside the controller to fetch restaurant list : {}, {} , {} ", pageRequestDto.getFilter(), pageRequestDto.getSize(), pageRequestDto.getPageNo());
-        Page<RestaurantListResponseDto> restaurants = adminRestaurantService.findAllRestaurantsWithFilters(pageRequestDto);
+        log.info("Inside the controller to fetch restaurant list : {}, {} , {} ", pageRequestDto.getFilter(),
+                pageRequestDto.getSize(), pageRequestDto.getPageNo());
+        Page<RestaurantListResponseDto> restaurants = adminRestaurantService
+                .findAllRestaurantsWithFilters(pageRequestDto);
         log.info("Successfully fetched list of restaurants");
         if (restaurants.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -43,7 +49,8 @@ public class AdminRestaurantController {
     }
 
     @PutMapping("/update/{encryptedId}")
-    public ResponseEntity<Void> updateRestaurant(@PathVariable String encryptedId, @RequestBody RestaurantUpdateDto dto) {
+    public ResponseEntity<Void> updateRestaurant(@PathVariable String encryptedId,
+            @RequestBody RestaurantUpdateDto dto) {
         log.info("Inside controller to update restaurant");
         adminRestaurantService.updateRestaurant(encryptedId, dto);
         log.info("Successfully updated restaurant");
@@ -72,6 +79,17 @@ public class AdminRestaurantController {
         adminRestaurantService.deleteRestaurant(encryptedId);
         log.info("Successfully deleted restaurant");
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/access-level/{encryptedId}")
+    public ResponseEntity<Void> updateAccessLevel(
+            @PathVariable String encryptedId,
+            @RequestBody Map<String, String> body) {
+        log.info("Inside controller to update access level for restaurant {}", encryptedId);
+        AccessLevelStatus level = AccessLevelStatus.valueOf(body.get("accessLevel").toUpperCase());
+        adminRestaurantService.updateAccessLevel(encryptedId, level);
+        log.info("Successfully updated access level to {}", level);
+        return ResponseEntity.ok().build();
     }
 
 }

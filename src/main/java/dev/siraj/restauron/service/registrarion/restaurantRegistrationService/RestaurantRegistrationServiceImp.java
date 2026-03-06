@@ -1,5 +1,6 @@
 package dev.siraj.restauron.service.registrarion.restaurantRegistrationService;
 
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.restaurant.Restaurant;
 import dev.siraj.restauron.entity.restaurant.RestaurantRegistration;
 import dev.siraj.restauron.entity.users.Owner;
@@ -34,6 +35,8 @@ public class RestaurantRegistrationServiceImp implements RestaurantRegistrationS
     public Restaurant registerRestaurantByRestaurantRegistrationDetailsAndOwner(RestaurantRegistration restaurantRegistration, Owner owner) {
 
         Restaurant restaurant = restaurantRegistrationMapping.mapRestaurantRegistrationEntityToRestaurantEntity(restaurantRegistration, owner);
+
+        restaurant.setAccessLevel(AccessLevelStatus.FULL);
 
         Restaurant savedRestaurant =  save(restaurant);
 

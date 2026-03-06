@@ -243,6 +243,57 @@ public class OrderServiceImp implements OrderService {
         orderRepository.deleteById(orderId);
     }
 
+    /**
+     * Replaces all items on an existing order and recalculates the total.
+     * If the resulting items list is empty an exception is thrown — the caller
+     * should delete the order instead.
+     */
+    @Transactional
+    @Override
+    public OrderDetailDto updateOrderItems(String encryptedOrderId, List<OrderRequest.ItemRequest> items) {
+        if (items == null || items.isEmpty()) {
+            throw new BadCredentialsException("Order must contain at least one item. Delete the order instead.");
+        }
+
+        Long orderId = idEncryptionService.decryptToLongId(encryptedOrderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
+
+        // Resolve all menu items in one query
+        List<Long> menuItemIds = items.stream()
+                .map(r -> idEncryptionService.decryptToLongId(r.getEncryptedId()))
+                .toList();
+        Map<Long, MenuItem> menuItemMap = menuItemRepository.findAllById(menuItemIds).stream()
+                .collect(Collectors.toMap(MenuItem::getId, mi -> mi));
+
+        // Build new item list
+        List<OrderItem> newItems = new ArrayList<>();
+        double total = 0.0;
+        for (OrderRequest.ItemRequest req : items) {
+            Long miId = idEncryptionService.decryptToLongId(req.getEncryptedId());
+            MenuItem mi = menuItemMap.get(miId);
+            if (mi == null) {
+                throw new EntityNotFoundException("Menu item not found: " + req.getEncryptedId());
+            }
+            OrderItem oi = new OrderItem();
+            oi.setOrder(order);
+            oi.setMenuItem(mi);
+            oi.setQuantity(req.getQuantity());
+            oi.setPriceAtOrder(mi.getPrice());
+            oi.setNote(req.getNote());
+            newItems.add(oi);
+            total += mi.getPrice() * req.getQuantity();
+        }
+
+        // Replace items (orphanRemoval will delete the old rows)
+        order.getItems().clear();
+        order.getItems().addAll(newItems);
+        order.setTotalAmount(total);
+
+        Order saved = orderRepository.save(order);
+        return toOrderDetailDto(saved);
+    }
+
     //
     // --- CUSTOMER-FACING METHODS ---
     //
@@ -494,10 +545,12 @@ public class OrderServiceImp implements OrderService {
 
         List<OrderDetailDto.OrderItemDto> itemDtos = order.getItems().stream().map(item -> {
             OrderDetailDto.OrderItemDto itemDto = new OrderDetailDto.OrderItemDto();
+            itemDto.setEncryptedMenuItemId(idEncryptionService.encryptLongId(item.getMenuItem().getId()));
             itemDto.setMenuItemName(item.getMenuItem().getName());
             itemDto.setQuantity(item.getQuantity());
             itemDto.setPriceAtOrder(item.getPriceAtOrder());
             itemDto.setItemTotal(item.getPriceAtOrder() * item.getQuantity());
+            itemDto.setNote(item.getNote());
             return itemDto;
         }).toList();
         dto.setItems(itemDtos);

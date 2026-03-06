@@ -9,4 +9,5 @@ public class TableResponseDto {
     private Long tableId;
     private String name;
     private Integer capacity;
+    private String status;
 }

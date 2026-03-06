@@ -3,6 +3,7 @@ package dev.siraj.restauron.service.adminService;
 import dev.siraj.restauron.DTO.admin.RestaurantDetailsDto;
 import dev.siraj.restauron.DTO.admin.RestaurantUpdateDto;
 import dev.siraj.restauron.DTO.common.PageRequestDto;
+import dev.siraj.restauron.entity.enums.AccessLevelStatus;
 import dev.siraj.restauron.entity.enums.AccountStatus;
 import dev.siraj.restauron.service.adminService.adminServiceInterface.AdminRestaurantService;
 
@@ -30,14 +31,12 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
     @Autowired
     private IdEncryptionService idEncryptionService;
 
-
     @Override
     public Page<RestaurantListResponseDto> findAllRestaurantsWithFilters(PageRequestDto pageRequestDto) {
         log.info("Started creating specification.....");
         Specification<Restaurant> spec = RestaurantSpecification.withDynamicQuery(
                 pageRequestDto.getFilter(),
-                pageRequestDto.getSearch()
-        );
+                pageRequestDto.getSearch());
         log.info("Finished Creating Specification!");
         Pageable pageable = PageRequest.of(pageRequestDto.getPageNo(), pageRequestDto.getSize());
 
@@ -50,12 +49,12 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
         return restaurantPage.map(this::convertToDto);
     }
 
-
     @Override
     public RestaurantDetailsDto getRestaurantDetails(String encryptedId) {
         Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found when checking for restaurant details"));
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Restaurant not found when checking for restaurant details"));
 
         return convertToDetailsDto(restaurant);
     }
@@ -91,6 +90,18 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
         restaurantRepository.save(restaurant);
     }
 
+    // --- UPDATE ACCESS LEVEL ---
+    @Transactional
+    @Override
+    public void updateAccessLevel(String encryptedId, AccessLevelStatus newAccessLevel) {
+        Long restaurantId = idEncryptionService.decryptToLongId(encryptedId);
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found when updating access level"));
+        restaurant.setAccessLevel(newAccessLevel);
+        restaurantRepository.save(restaurant);
+        log.info("Updated access level for restaurant {} to {}", restaurantId, newAccessLevel);
+    }
+
     // --- DELETE ---
     @Transactional
     @Override
@@ -100,7 +111,8 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
             throw new EntityNotFoundException("Restaurant not found when deleting restaurant");
         }
         // Note: The @OneToMany(cascade=CascadeType.ALL) on employees and
-        // @OneToOne(cascade=CascadeType.REMOVE) on owner will handle deletion of dependents.
+        // @OneToOne(cascade=CascadeType.REMOVE) on owner will handle deletion of
+        // dependents.
         restaurantRepository.deleteById(restaurantId);
     }
 
@@ -116,6 +128,8 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
         dto.setState(restaurant.getState());
         dto.setPincode(restaurant.getPincode());
         dto.setStatus(restaurant.getStatus().name());
+        dto.setAccessLevel(restaurant.getAccessLevel() != null ? restaurant.getAccessLevel().name()
+                : AccessLevelStatus.FULL.name());
 
         if (restaurant.getOwner() != null && restaurant.getOwner().getUser() != null) {
             dto.setOwnerName(restaurant.getOwner().getUser().getName());
@@ -135,7 +149,5 @@ public class AdminRestaurantServiceImp implements AdminRestaurantService {
         dto.setStatus(restaurant.getStatus().name()); // Uncomment when you have a status field
         return dto;
     }
-
-
 
 }

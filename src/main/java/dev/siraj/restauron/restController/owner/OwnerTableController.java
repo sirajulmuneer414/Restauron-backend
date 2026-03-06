@@ -1,7 +1,5 @@
 package dev.siraj.restauron.restController.owner;
 
-
-import dev.siraj.restauron.DTO.admin.RestaurantUpdateDto;
 import dev.siraj.restauron.DTO.owner.restaurantManagement.TableResponseDto;
 import dev.siraj.restauron.DTO.table.RestaurantTableRequestDTO;
 import dev.siraj.restauron.customAnnotations.authorization.RolesAllowed;
@@ -19,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/owner/tables")
-@RolesAllowed(roles = {"OWNER"})
+@RolesAllowed(roles = { "OWNER" })
 @Slf4j
 public class OwnerTableController {
 
@@ -33,26 +31,42 @@ public class OwnerTableController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createTable(@RequestBody RestaurantTableRequestDTO payload, @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
+    public ResponseEntity<Void> createTable(@RequestBody RestaurantTableRequestDTO payload,
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
         log.info("inside the controller to create table");
-        // Assuming your UserDetails implementation has a method to get the user ID
         Long ownerId = ownerService.getOwnerIdFromRestaurantEncryptedId(encryptedRestaurantId);
-        tableService.createTable(payload.name(), payload.capacity() , ownerId);
+        tableService.createTable(payload.name(), payload.capacity(), ownerId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<TableResponseDto>> listTables(@RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
-
+    public ResponseEntity<List<TableResponseDto>> listTables(
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
         log.info("Inside the controller to fetch list of tables");
         Long ownerId = ownerService.getOwnerIdFromRestaurantEncryptedId(encryptedRestaurantId);
-
         return ResponseEntity.ok(tableService.getTablesForOwner(ownerId));
     }
 
+    @PatchMapping("/{encryptedTableId}/status")
+    public ResponseEntity<?> updateTableStatus(
+            @PathVariable String encryptedTableId,
+            @RequestBody Map<String, String> body,
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
+        log.info("Inside updateTableStatus controller for table {}", encryptedTableId);
+        Long ownerId = ownerService.getOwnerIdFromRestaurantEncryptedId(encryptedRestaurantId);
+        try {
+            TableResponseDto updated = tableService.updateTableStatus(encryptedTableId, body.get("status"), ownerId);
+            return ResponseEntity.ok(updated);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>("You are not authorized to update this table", HttpStatus.FORBIDDEN);
+        }
+    }
+
     @DeleteMapping("/delete/{encryptedTableId}")
-    public ResponseEntity<?> deleteTable(@PathVariable String encryptedTableId,@RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
-        log.info("Inside the delete table controller with : restaurantId {} and table id {}",encryptedRestaurantId,encryptedTableId);
+    public ResponseEntity<?> deleteTable(@PathVariable String encryptedTableId,
+            @RequestHeader("X-Restaurant-Id") String encryptedRestaurantId) {
+        log.info("Inside the delete table controller with : restaurantId {} and table id {}", encryptedRestaurantId,
+                encryptedTableId);
         Long ownerId = ownerService.getOwnerIdFromRestaurantEncryptedId(encryptedRestaurantId);
         log.info("Successfully got ownerId {}", ownerId);
         try {

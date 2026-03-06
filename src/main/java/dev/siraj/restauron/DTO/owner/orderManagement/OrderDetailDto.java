@@ -31,5 +31,6 @@ public class OrderDetailDto {
         private int quantity;
         private Double priceAtOrder;
         private Double itemTotal;
+        private String note;
     }
 }
